@@ -47,12 +47,6 @@
   <div id="calendar-page" class="container max-w-4xl mx-auto my-5 p-5 bg-white rounded-lg shadow-lg" style="display: none;">
     <h1 class="text-center text-3xl font-extrabold mb-6 text-gray-900">철도 근무 스케줄 캘린더 (<span id="selectedTeamDisplay">A조</span>)</h1>
 
-    <!-- 로딩 메시지 및 사용자 ID 표시 -->
-    <div id="loading-area" class="text-center mt-4 mb-2">
-      <div id="loading-message" class="text-gray-600">데이터 로딩 중...</div>
-      <div id="user-id-display" class="text-sm text-gray-500 mt-1"></div>
-    </div>
-
     <!-- 현재 표시 월/년도 및 월 이동 버튼 -->
     <div class="flex justify-between items-center mb-4">
       <button id="prevMonthBtn" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors duration-200">이전 달</button>
@@ -78,8 +72,7 @@
     </div>
   </div>
 
-
-
+  <script type="module">
     // DOM 요소 참조
     const patternSelectionPage = document.getElementById('pattern-selection-page');
     const calendarPage = document.getElementById('calendar-page');
@@ -91,12 +84,10 @@
     const currentMonthYearEl = document.getElementById('currentMonthYear');
     const prevMonthBtn = document.getElementById('prevMonthBtn');
     const nextMonthBtn = document.getElementById('nextMonthBtn');
-    const loadingMessageEl = document.getElementById('loading-message');
 
     // 전역 변수
     let currentDisplayDate = new Date(); // 현재 캘린더에 표시될 년도와 월을 추적
     let selectedPatternKey = 'A'; // 선택된 조 (기본값 A)
-    let customShiftsForCurrentMonth = new Map(); // 현재 표시 월의 사용자 정의 근무를 저장
 
     // 각 근무 패턴 정의 (약어 적용)
     const shiftPatterns = {
@@ -121,9 +112,7 @@
       document.getElementById(pageId).style.display = 'block';
     }
 
-
-
-    // 캘린더의 날짜 부분만 렌더링하는 함수 (데이터 로드 후 호출)
+    // 캘린더의 날짜 부분만 렌더링하는 함수
     function renderCalendarDays() {
       const displayYear = currentDisplayDate.getFullYear();
       const displayMonth = currentDisplayDate.getMonth();
@@ -173,10 +162,27 @@
         const shiftIndexForCurrentDay = (startingShiftIndexForFirstDayOfMonth + (i - 1)) % patternLength;
         let shift = currentShiftPattern[shiftIndexForCurrentDay]; // 기본 패턴 근무
 
+        dayEl.innerHTML = `
+          <span class="absolute top-1 right-2 text-sm text-gray-600 font-medium">${i}</span>
+          <div class="shift mt-5 font-bold text-base text-center text-blue-800">${shift}</div>
+        `;
+
+        dayEl.addEventListener('click', () => {
           const validShifts = ['주', '야', '비', '휴', '지주', '지야', '초주', '초야'];
           const newShift = prompt(`근무 형태를 입력하세요 (${validShifts.join('/')}):`, shift);
           
-   
+          if (newShift !== null && validShifts.includes(newShift)) {
+            dayEl.querySelector('.shift').textContent = newShift;
+            // **주의: 이 변경사항은 저장되지 않습니다. 페이지를 새로고침하면 초기화됩니다.**
+          } else if (newShift !== null) {
+            alert(`유효한 근무 형태를 입력해주세요: ${validShifts.join(', ')}`);
+          }
+        });
+
+        calendarEl.appendChild(dayEl);
+      }
+    }
+
     // 캘린더 구조 (월/년도, 오늘 날짜, 조 표시)를 렌더링하는 함수
     function renderCalendarStructure() {
       const displayYear = currentDisplayDate.getFullYear();
@@ -195,7 +201,7 @@
     // 캘린더 전체를 로드하고 렌더링하는 메인 함수
     function loadAndRenderCalendar() {
       renderCalendarStructure(); // 정적 구조 렌더링
-      loadShiftsForMonth(currentDisplayDate.getFullYear(), currentDisplayDate.getMonth()); // 해당 월의 근무 로드 및 날짜 렌더링 트리거
+      renderCalendarDays(); // 날짜 및 근무 형태 렌더링
     }
 
     // 월 이동 버튼 이벤트 리스너
@@ -217,7 +223,6 @@
         selectedPatternKey = selectedRadio.value;
         currentDisplayDate = new Date(); // 캘린더 페이지로 이동 시 현재 월로 초기화
         showPage('calendar-page');
-        // 캘린더를 로드하고 렌더링 (Firebase 준비 여부에 따라 데이터 로드 방식이 달라짐)
         loadAndRenderCalendar();
       } else {
         alert('조를 선택해주세요.');
@@ -227,9 +232,6 @@
     // "이전 페이지" 버튼 클릭 이벤트
     backToSelectionBtn.addEventListener('click', () => {
       showPage('pattern-selection-page'); // 조 선택 페이지로 돌아감
-      if (unsubscribeFromShifts) {
-        unsubscribeFromShifts(); // 캘린더 페이지를 떠날 때 Firestore 리스너 해제
-      }
     });
 
     // 초기 페이지 로드 시 조 선택 페이지 표시
