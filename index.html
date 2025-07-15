@@ -17,6 +17,13 @@
   <div class="container max-w-4xl mx-auto my-5 p-5 bg-white rounded-lg shadow-lg">
     <h1 class="text-center text-3xl font-extrabold mb-6 text-gray-900">철도 근무 스케줄 캘린더</h1>
 
+    <!-- 현재 표시 월/년도 및 월 이동 버튼 -->
+    <div class="flex justify-between items-center mb-4">
+      <button id="prevMonthBtn" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors duration-200">이전 달</button>
+      <div id="currentMonthYear" class="text-center text-xl font-bold text-gray-800"></div>
+      <button id="nextMonthBtn" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors duration-200">다음 달</button>
+    </div>
+
     <!-- 오늘 날짜를 표시하는 영역 -->
     <div id="today-date" class="text-center text-lg font-semibold mb-4 text-blue-600"></div>
 
@@ -51,6 +58,12 @@
   <script>
     const calendarEl = document.getElementById('calendar');
     const todayDateEl = document.getElementById('today-date');
+    const currentMonthYearEl = document.getElementById('currentMonthYear');
+    const prevMonthBtn = document.getElementById('prevMonthBtn');
+    const nextMonthBtn = document.getElementById('nextMonthBtn');
+
+    // 현재 캘린더에 표시될 년도와 월을 추적하는 변수
+    let currentDisplayDate = new Date(); // 초기값은 현재 날짜
 
     // 각 근무 패턴 정의
     const shiftPatterns = {
@@ -60,12 +73,12 @@
       'D': ['휴무', '주간', '야간', '비번']
     };
 
-    // 각 패턴에서 '휴무'가 위치하는 인덱스 (오늘을 '휴무'로 맞추기 위함)
-    const targetShiftIndexForToday = {
-      'A': 3, // ['주간', '야간', '비번', '휴무'] 에서 '휴무'는 인덱스 3
-      'B': 2, // ['야간', '비번', '휴무', '주간'] 에서 '휴무'는 인덱스 2
-      'C': 1, // ['비번', '휴무', '주간', '야간'] 에서 '휴무'는 인덱스 1
-      'D': 0  // ['휴무', '주간', '야간', '비번'] 에서 '휴무'는 인덱스 0
+    // 7월 15일 (2025년)을 기준으로 각 조가 가져야 할 근무 형태
+    const targetShiftForJuly15_2025 = {
+      'A': '휴무',
+      'B': '주간',
+      'C': '야간',
+      'D': '비번'
     };
 
     // 현재 선택된 패턴 키 (A, B, C, D)를 가져오는 함수
@@ -75,28 +88,47 @@
 
     // 캘린더를 렌더링하는 함수
     function renderCalendar() {
-      const today = new Date();
-      const year = today.getFullYear();
-      const month = today.getMonth(); // 0부터 시작 (0:1월, 1:2월...)
-      const currentDayOfMonth = today.getDate(); // 오늘 날짜 (1-31)
+      const displayYear = currentDisplayDate.getFullYear();
+      const displayMonth = currentDisplayDate.getMonth(); // 0부터 시작 (0:1월, 1:2월...)
 
-      // 오늘 날짜를 상단에 표시
-      todayDateEl.textContent = `${year}년 ${month + 1}월 ${currentDayOfMonth}일`;
+      const today = new Date(); // 오늘 날짜는 항상 고정
+      const currentYear = today.getFullYear();
+      const currentMonth = today.getMonth();
+      const currentDayOfMonth = today.getDate();
 
-      const firstDayOfMonth = new Date(year, month, 1); // 현재 월의 첫째 날
-      const lastDayOfMonth = new Date(year, month + 1, 0); // 현재 월의 마지막 날
-      const daysInMonth = lastDayOfMonth.getDate(); // 현재 월의 총 일수
+      // 현재 표시 월/년도 업데이트
+      currentMonthYearEl.textContent = `${displayYear}년 ${displayMonth + 1}월`;
+      // 오늘 날짜를 상단에 표시 (이것은 항상 '오늘'을 의미)
+      todayDateEl.textContent = `${currentYear}년 ${currentMonth + 1}월 ${currentDayOfMonth}일`;
+
+      const firstDayOfMonth = new Date(displayYear, displayMonth, 1); // 현재 표시 월의 첫째 날
+      const lastDayOfMonth = new Date(displayYear, displayMonth + 1, 0); // 현재 표시 월의 마지막 날
+      const daysInMonth = lastDayOfMonth.getDate(); // 현재 표시 월의 총 일수
       calendarEl.innerHTML = ''; // 캘린더 초기화
 
       const selectedPatternKey = getSelectedPatternKey();
       const currentShiftPattern = shiftPatterns[selectedPatternKey];
       const patternLength = currentShiftPattern.length; // 패턴 길이 (항상 4)
 
-      // 현재 월의 첫째 날의 근무 형태 인덱스를 계산합니다.
-      // 이는 오늘 날짜가 선택된 패턴에서 '휴무'에 해당하도록 조정합니다.
-      const targetIndex = targetShiftIndexForToday[selectedPatternKey];
-      const daysOffsetFromFirstToToday = currentDayOfMonth - 1; // 월의 첫째 날부터 오늘까지의 일수 차이
-      let currentShiftIndex = (targetIndex - (daysOffsetFromFirstToToday % patternLength) + patternLength) % patternLength;
+      // 월의 첫째 날에 적용될 근무 패턴의 시작 인덱스를 결정합니다.
+      let startingShiftIndexForFirstDayOfMonth = 0; // 기본값: 패턴의 첫 번째 요소부터 시작
+
+      // 2025년 7월 (month 6)인 경우에만 7월 15일 기준 근무 형태를 적용합니다.
+      if (displayYear === 2025 && displayMonth === 6) {
+        const targetShift = targetShiftForJuly15_2025[selectedPatternKey];
+        const targetShiftIndex = currentShiftPattern.indexOf(targetShift);
+
+        if (targetShiftIndex !== -1) { // 목표 근무 형태를 찾았을 경우
+          // 7월 1일부터 7월 15일까지의 일수 차이 (14일)
+          const daysOffsetFromFirstToJuly15 = 14; // 15일 - 1일 = 14일
+
+          // (start_index + daysOffsetFromFirstToJuly15) % patternLength = targetShiftIndex
+          // start_index = (targetShiftIndex - (daysOffsetFromFirstToJuly15 % patternLength) + patternLength) % patternLength
+          startingShiftIndexForFirstDayOfMonth = (targetShiftIndex - (daysOffsetFromFirstToJuly15 % patternLength) + patternLength) % patternLength;
+        }
+      }
+      // 다른 월의 경우 startingShiftIndexForFirstDayOfMonth는 기본값인 0을 유지합니다.
+      // 즉, 각 월은 해당 패턴의 첫 번째 근무 형태부터 시작합니다.
 
       // 월요일부터 시작하도록 달력의 빈 공간을 채웁니다.
       // getDay()는 일요일(0)부터 토요일(6)까지 반환합니다.
@@ -114,13 +146,15 @@
         const dayEl = document.createElement('div');
         dayEl.className = 'day bg-blue-50 p-2 rounded-md min-h-[80px] relative cursor-pointer hover:bg-blue-100 transition-colors duration-200';
 
-        // 오늘 날짜를 강조합니다.
-        if (i === currentDayOfMonth && month === today.getMonth() && year === today.getFullYear()) {
+        // 오늘 날짜를 강조합니다. (현재 시스템 날짜 기준)
+        if (i === currentDayOfMonth && displayMonth === currentMonth && displayYear === currentYear) {
           dayEl.classList.add('border-2', 'border-blue-500', 'bg-blue-200', 'shadow-md');
         }
 
-        const shift = currentShiftPattern[currentShiftIndex]; // 현재 날짜의 근무 형태
-        currentShiftIndex = (currentShiftIndex + 1) % patternLength; // 다음 날짜를 위해 인덱스 증가 (패턴 반복)
+        // 현재 날짜 'i'에 대한 근무 형태 인덱스를 계산합니다.
+        // 'i - 1'은 1일이 인덱스 0에 해당하도록 조정합니다.
+        const shiftIndexForCurrentDay = (startingShiftIndexForFirstDayOfMonth + (i - 1)) % patternLength;
+        const shift = currentShiftPattern[shiftIndexForCurrentDay]; // 현재 날짜의 근무 형태
 
         dayEl.innerHTML = `
           <span class="absolute top-1 right-2 text-sm text-gray-600 font-medium">${i}</span>
@@ -129,17 +163,32 @@
 
         // 날짜 클릭 시 근무 형태를 수동으로 변경할 수 있는 이벤트 리스너
         dayEl.addEventListener('click', () => {
-          const newShift = prompt('근무 형태를 입력하세요 (주간/야간/비번/휴무):', shift);
-          if (['주간','야간','비번','휴무'].includes(newShift)) {
+          const validShifts = ['주간', '야간', '비번', '휴무', '지정(주)', '지정(야)', '초과(주)', '초과(야)'];
+          const newShift = prompt(`근무 형태를 입력하세요 (${validShifts.join('/')}):`, shift);
+          
+          // 사용자가 취소하지 않고 유효한 값을 입력했는지 확인
+          if (newShift !== null && validShifts.includes(newShift)) {
             dayEl.querySelector('.shift').textContent = newShift;
           } else if (newShift !== null) { // 사용자가 취소하지 않고 유효하지 않은 값을 입력한 경우
-            alert('유효한 근무 형태를 입력해주세요: 주간, 야간, 비번, 휴무');
+            alert(`유효한 근무 형태를 입력해주세요: ${validShifts.join(', ')}`);
           }
         });
 
         calendarEl.appendChild(dayEl);
       }
     }
+
+    // 이전 달 버튼 클릭 이벤트
+    prevMonthBtn.addEventListener('click', () => {
+      currentDisplayDate.setMonth(currentDisplayDate.getMonth() - 1);
+      renderCalendar();
+    });
+
+    // 다음 달 버튼 클릭 이벤트
+    nextMonthBtn.addEventListener('click', () => {
+      currentDisplayDate.setMonth(currentDisplayDate.getMonth() + 1);
+      renderCalendar();
+    });
 
     // 페이지 로드 시 초기 캘린더 렌더링
     renderCalendar();
