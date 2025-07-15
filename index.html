@@ -93,79 +93,146 @@
     <!-- 안내 업무 섹션 -->
     <div id="info-section" class="task-section">
       <h2 class="text-2xl font-bold mb-4 text-gray-800">안내 업무</h2>
-      <!-- 상행/하행 선택 버튼 -->
+      <!-- 주간/야간 선택 버튼 (안내 업무 전용) -->
       <div class="flex justify-center gap-4 mb-4">
-        <button id="showUpboundInfoBtn" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition-colors duration-200">상행</button>
-        <button id="showDownboundInfoBtn" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition-colors duration-200">하행</button>
+        <button id="showInfoDayShiftBtn" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition-colors duration-200">주간</button>
+        <button id="showInfoNightShiftBtn" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition-colors duration-200">야간</button>
       </div>
 
-      <!-- 상행 안내 업무 -->
-      <div id="upbound-info-section" class="sub-task-section">
-        <h3 class="text-xl font-semibold mb-3 text-blue-700">상행 업무</h3>
-        <!-- 주간/야간 선택 버튼 -->
+      <!-- 주간 안내 업무 방향 선택 및 목록 -->
+      <div id="info-day-shift-container" class="shift-direction-container" style="display: none;">
+        <h3 class="text-xl font-semibold mb-3 text-blue-700">주간 방향 선택</h3>
         <div class="flex justify-center gap-4 mb-4">
-          <button id="showUpboundInfoDayShiftBtn" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition-colors duration-200">주간</button>
-          <button id="showUpboundInfoNightShiftBtn" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition-colors duration-200">야간</button>
+          <button id="showInfoDayUpboundBtn" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition-colors duration-200">상행</button>
+          <button id="showInfoDayDownboundBtn" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition-colors duration-200">하행</button>
         </div>
 
-        <div id="upbound-info-day-shift-tasks" class="shift-tasks-list">
-          <h4 class="text-lg font-medium mb-2 text-gray-700">주간 업무 목록</h4>
+        <div id="upbound-info-day-shift-tasks" class="shift-tasks-list" style="display: none;">
+          <h4 class="text-lg font-medium mb-2 text-gray-700">상행 주간 업무 목록</h4>
           <div class="space-y-3">
+            <!-- 9:10 화장실점검 -->
             <div class="flex items-center p-2 bg-gray-50 rounded-md shadow-sm">
-              <span class="font-bold w-16 flex-shrink-0">09:00</span>
-              <span class="flex-grow">상행 승강장 안전 확인</span> <!-- 할일 -->
-              <input type="text" placeholder="메모" class="flex-grow mx-2 p-1 border border-gray-300 rounded-md text-sm"> <!-- 메모 -->
+              <span class="font-bold w-16 flex-shrink-0">09:10</span>
+              <span class="flex-grow">화장실점검</span>
+              <input type="text" placeholder="메모" class="flex-grow mx-2 p-1 border border-gray-300 rounded-md text-sm">
               <input type="checkbox" class="ml-2 h-5 w-5 text-green-600 rounded">
             </div>
+            <!-- 9:10 리프트 점검 -->
+            <div class="flex items-center p-2 bg-gray-50 rounded-md shadow-sm">
+              <span class="font-bold w-16 flex-shrink-0">09:10</span>
+              <span class="flex-grow">리프트 점검</span>
+              <input type="text" placeholder="메모" class="flex-grow mx-2 p-1 border border-gray-300 rounded-md text-sm">
+              <input type="checkbox" class="ml-2 h-5 w-5 text-green-600 rounded">
+            </div>
+            <!-- 9:10 유실물 갯수 확인 -->
+            <div class="flex items-center p-2 bg-gray-50 rounded-md shadow-sm">
+              <span class="font-bold w-16 flex-shrink-0">09:10</span>
+              <span class="flex-grow">유실물 갯수 확인</span>
+              <input type="text" placeholder="메모" class="flex-grow mx-2 p-1 border border-gray-300 rounded-md text-sm">
+              <input type="checkbox" class="ml-2 h-5 w-5 text-green-600 rounded">
+            </div>
+            <!-- 10:00 수유방 점검 -->
             <div class="flex items-center p-2 bg-gray-50 rounded-md shadow-sm">
               <span class="font-bold w-16 flex-shrink-0">10:00</span>
-              <span class="flex-grow">상행 고객 민원 응대</span>
+              <span class="flex-grow">수유방 점검</span>
+              <input type="text" placeholder="메모" class="flex-grow mx-2 p-1 border border-gray-300 rounded-md text-sm">
+              <input type="checkbox" class="ml-2 h-5 w-5 text-green-600 rounded">
+            </div>
+            <!-- 14:00 수유방점검 -->
+            <div class="flex items-center p-2 bg-gray-50 rounded-md shadow-sm">
+              <span class="font-bold w-16 flex-shrink-0">14:00</span>
+              <span class="flex-grow">수유방점검</span>
               <input type="text" placeholder="메모" class="flex-grow mx-2 p-1 border border-gray-300 rounded-md text-sm">
               <input type="checkbox" class="ml-2 h-5 w-5 text-green-600 rounded">
             </div>
           </div>
+        </div>
+
+        <div id="downbound-info-day-shift-tasks" class="shift-tasks-list" style="display: none;">
+          <h4 class="text-lg font-medium mb-2 text-gray-700">하행 주간 업무 목록</h4>
+          <div class="space-y-3">
+            <!-- 9:10 화장실점검 -->
+            <div class="flex items-center p-2 bg-gray-50 rounded-md shadow-sm">
+              <span class="font-bold w-16 flex-shrink-0">09:10</span>
+              <span class="flex-grow">화장실점검</span>
+              <input type="text" placeholder="메모" class="flex-grow mx-2 p-1 border border-gray-300 rounded-md text-sm">
+              <input type="checkbox" class="ml-2 h-5 w-5 text-green-600 rounded">
+            </div>
+            <!-- 9:10 리프트 점검 -->
+            <div class="flex items-center p-2 bg-gray-50 rounded-md shadow-sm">
+              <span class="font-bold w-16 flex-shrink-0">09:10</span>
+              <span class="flex-grow">리프트 점검</span>
+              <input type="text" placeholder="메모" class="flex-grow mx-2 p-1 border border-gray-300 rounded-md text-sm">
+              <input type="checkbox" class="ml-2 h-5 w-5 text-green-600 rounded">
+            </div>
+            <!-- 9:10 유실물 갯수 확인 -->
+            <div class="flex items-center p-2 bg-gray-50 rounded-md shadow-sm">
+              <span class="font-bold w-16 flex-shrink-0">09:10</span>
+              <span class="flex-grow">유실물 갯수 확인</span>
+              <input type="text" placeholder="메모" class="flex-grow mx-2 p-1 border border-gray-300 rounded-md text-sm">
+              <input type="checkbox" class="ml-2 h-5 w-5 text-green-600 rounded">
+            </div>
+            <!-- 10:00 수유방 점검 -->
+            <div class="flex items-center p-2 bg-gray-50 rounded-md shadow-sm">
+              <span class="font-bold w-16 flex-shrink-0">10:00</span>
+              <span class="flex-grow">수유방 점검</span>
+              <input type="text" placeholder="메모" class="flex-grow mx-2 p-1 border border-gray-300 rounded-md text-sm">
+              <input type="checkbox" class="ml-2 h-5 w-5 text-green-600 rounded">
+            </div>
+            <!-- 14:00 수유방점검 -->
+            <div class="flex items-center p-2 bg-gray-50 rounded-md shadow-sm">
+              <span class="font-bold w-16 flex-shrink-0">14:00</span>
+              <span class="flex-grow">수유방점검</span>
+              <input type="text" placeholder="메모" class="flex-grow mx-2 p-1 border border-gray-300 rounded-md text-sm">
+              <input type="checkbox" class="ml-2 h-5 w-5 text-green-600 rounded">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 야간 안내 업무 방향 선택 및 목록 -->
+      <div id="info-night-shift-container" class="shift-direction-container" style="display: none;">
+        <h3 class="text-xl font-semibold mb-3 text-blue-700">야간 방향 선택</h3>
+        <div class="flex justify-center gap-4 mb-4">
+          <button id="showInfoNightUpboundBtn" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition-colors duration-200">상행</button>
+          <button id="showInfoNightDownboundBtn" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition-colors duration-200">하행</button>
         </div>
 
         <div id="upbound-info-night-shift-tasks" class="shift-tasks-list" style="display: none;">
-          <h4 class="text-lg font-medium mb-2 text-gray-700">야간 업무 목록</h4>
+          <h4 class="text-lg font-medium mb-2 text-gray-700">상행 야간 업무 목록</h4>
           <div class="space-y-3">
+            <!-- 9:10 화장실점검 -->
             <div class="flex items-center p-2 bg-gray-50 rounded-md shadow-sm">
-              <span class="font-bold w-16 flex-shrink-0">18:00</span>
-              <span class="flex-grow">상행 최종 승강장 확인</span>
+              <span class="font-bold w-16 flex-shrink-0">09:10</span>
+              <span class="flex-grow">화장실점검</span>
               <input type="text" placeholder="메모" class="flex-grow mx-2 p-1 border border-gray-300 rounded-md text-sm">
               <input type="checkbox" class="ml-2 h-5 w-5 text-green-600 rounded">
             </div>
+            <!-- 9:10 리프트 점검 -->
             <div class="flex items-center p-2 bg-gray-50 rounded-md shadow-sm">
-              <span class="font-bold w-16 flex-shrink-0">20:00</span>
-              <span class="flex-grow">상행 야간 순찰</span>
+              <span class="font-bold w-16 flex-shrink-0">09:10</span>
+              <span class="flex-grow">리프트 점검</span>
               <input type="text" placeholder="메모" class="flex-grow mx-2 p-1 border border-gray-300 rounded-md text-sm">
               <input type="checkbox" class="ml-2 h-5 w-5 text-green-600 rounded">
             </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- 하행 안내 업무 -->
-      <div id="downbound-info-section" class="sub-task-section" style="display: none;">
-        <h3 class="text-xl font-semibold mb-3 text-blue-700">하행 업무</h3>
-        <!-- 주간/야간 선택 버튼 -->
-        <div class="flex justify-center gap-4 mb-4">
-          <button id="showDownboundInfoDayShiftBtn" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition-colors duration-200">주간</button>
-          <button id="showDownboundInfoNightShiftBtn" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition-colors duration-200">야간</button>
-        </div>
-
-        <div id="downbound-info-day-shift-tasks" class="shift-tasks-list">
-          <h4 class="text-lg font-medium mb-2 text-gray-700">주간 업무 목록</h4>
-          <div class="space-y-3">
+            <!-- 9:10 유실물 갯수 확인 -->
             <div class="flex items-center p-2 bg-gray-50 rounded-md shadow-sm">
-              <span class="font-bold w-16 flex-shrink-0">09:30</span>
-              <span class="flex-grow">하행 승강장 안전 확인</span>
+              <span class="font-bold w-16 flex-shrink-0">09:10</span>
+              <span class="flex-grow">유실물 갯수 확인</span>
               <input type="text" placeholder="메모" class="flex-grow mx-2 p-1 border border-gray-300 rounded-md text-sm">
               <input type="checkbox" class="ml-2 h-5 w-5 text-green-600 rounded">
             </div>
+            <!-- 10:00 수유방 점검 -->
             <div class="flex items-center p-2 bg-gray-50 rounded-md shadow-sm">
-              <span class="font-bold w-16 flex-shrink-0">10:30</span>
-              <span class="flex-grow">하행 고객 민원 응대</span>
+              <span class="font-bold w-16 flex-shrink-0">10:00</span>
+              <span class="flex-grow">수유방 점검</span>
+              <input type="text" placeholder="메모" class="flex-grow mx-2 p-1 border border-gray-300 rounded-md text-sm">
+              <input type="checkbox" class="ml-2 h-5 w-5 text-green-600 rounded">
+            </div>
+            <!-- 14:00 수유방점검 -->
+            <div class="flex items-center p-2 bg-gray-50 rounded-md shadow-sm">
+              <span class="font-bold w-16 flex-shrink-0">14:00</span>
+              <span class="flex-grow">수유방점검</span>
               <input type="text" placeholder="메모" class="flex-grow mx-2 p-1 border border-gray-300 rounded-md text-sm">
               <input type="checkbox" class="ml-2 h-5 w-5 text-green-600 rounded">
             </div>
@@ -173,17 +240,40 @@
         </div>
 
         <div id="downbound-info-night-shift-tasks" class="shift-tasks-list" style="display: none;">
-          <h4 class="text-lg font-medium mb-2 text-gray-700">야간 업무 목록</h4>
+          <h4 class="text-lg font-medium mb-2 text-gray-700">하행 야간 업무 목록</h4>
           <div class="space-y-3">
+            <!-- 9:10 화장실점검 -->
             <div class="flex items-center p-2 bg-gray-50 rounded-md shadow-sm">
-              <span class="font-bold w-16 flex-shrink-0">18:30</span>
-              <span class="flex-grow">하행 최종 승강장 확인</span>
+              <span class="font-bold w-16 flex-shrink-0">09:10</span>
+              <span class="flex-grow">화장실점검</span>
               <input type="text" placeholder="메모" class="flex-grow mx-2 p-1 border border-gray-300 rounded-md text-sm">
               <input type="checkbox" class="ml-2 h-5 w-5 text-green-600 rounded">
             </div>
+            <!-- 9:10 리프트 점검 -->
             <div class="flex items-center p-2 bg-gray-50 rounded-md shadow-sm">
-              <span class="font-bold w-16 flex-shrink-0">20:30</span>
-              <span class="flex-grow">하행 야간 순찰</span>
+              <span class="font-bold w-16 flex-shrink-0">09:10</span>
+              <span class="flex-grow">리프트 점검</span>
+              <input type="text" placeholder="메모" class="flex-grow mx-2 p-1 border border-gray-300 rounded-md text-sm">
+              <input type="checkbox" class="ml-2 h-5 w-5 text-green-600 rounded">
+            </div>
+            <!-- 9:10 유실물 갯수 확인 -->
+            <div class="flex items-center p-2 bg-gray-50 rounded-md shadow-sm">
+              <span class="font-bold w-16 flex-shrink-0">09:10</span>
+              <span class="flex-grow">유실물 갯수 확인</span>
+              <input type="text" placeholder="메모" class="flex-grow mx-2 p-1 border border-gray-300 rounded-md text-sm">
+              <input type="checkbox" class="ml-2 h-5 w-5 text-green-600 rounded">
+            </div>
+            <!-- 10:00 수유방 점검 -->
+            <div class="flex items-center p-2 bg-gray-50 rounded-md shadow-sm">
+              <span class="font-bold w-16 flex-shrink-0">10:00</span>
+              <span class="flex-grow">수유방 점검</span>
+              <input type="text" placeholder="메모" class="flex-grow mx-2 p-1 border border-gray-300 rounded-md text-sm">
+              <input type="checkbox" class="ml-2 h-5 w-5 text-green-600 rounded">
+            </div>
+            <!-- 14:00 수유방점검 -->
+            <div class="flex items-center p-2 bg-gray-50 rounded-md shadow-sm">
+              <span class="font-bold w-16 flex-shrink-0">14:00</span>
+              <span class="flex-grow">수유방점검</span>
               <input type="text" placeholder="메모" class="flex-grow mx-2 p-1 border border-gray-300 rounded-md text-sm">
               <input type="checkbox" class="ml-2 h-5 w-5 text-green-600 rounded">
             </div>
@@ -203,48 +293,14 @@
       <div id="ticketing-day-shift-tasks" class="shift-tasks-list">
         <h3 class="text-xl font-semibold mb-3 text-blue-700">주간 업무</h3>
         <div class="space-y-3">
-          <div class="flex items-center p-2 bg-gray-50 rounded-md shadow-sm">
-            <span class="font-bold w-16 flex-shrink-0">09:00</span>
-            <span class="flex-grow">매표기 현금 확인</span>
-            <input type="text" placeholder="메모" class="flex-grow mx-2 p-1 border border-gray-300 rounded-md text-sm">
-            <input type="checkbox" class="ml-2 h-5 w-5 text-green-600 rounded">
-          </div>
-          <div class="flex items-center p-2 bg-gray-50 rounded-md shadow-sm">
-            <span class="font-bold w-16 flex-shrink-0">11:00</span>
-            <span class="flex-grow">환불 처리</span>
-            <input type="text" placeholder="메모" class="flex-grow mx-2 p-1 border border-gray-300 rounded-md text-sm">
-            <input type="checkbox" class="ml-2 h-5 w-5 text-green-600 rounded">
-          </div>
-          <div class="flex items-center p-2 bg-gray-50 rounded-md shadow-sm">
-            <span class="font-bold w-16 flex-shrink-0">14:00</span>
-            <span class="flex-grow">일일 정산 준비</span>
-            <input type="text" placeholder="메모" class="flex-grow mx-2 p-1 border border-gray-300 rounded-md text-sm">
-            <input type="checkbox" class="ml-2 h-5 w-5 text-green-600 rounded">
-          </div>
+          <!-- 매표 주간 업무를 여기에 추가해주세요. -->
         </div>
       </div>
 
       <div id="ticketing-night-shift-tasks" class="shift-tasks-list" style="display: none;">
         <h3 class="text-xl font-semibold mb-3 text-blue-700">야간 업무</h3>
         <div class="space-y-3">
-          <div class="flex items-center p-2 bg-gray-50 rounded-md shadow-sm">
-            <span class="font-bold w-16 flex-shrink-0">19:00</span>
-            <span class="flex-grow">매표기 마감</span>
-            <input type="text" placeholder="메모" class="flex-grow mx-2 p-1 border border-gray-300 rounded-md text-sm">
-            <input type="checkbox" class="ml-2 h-5 w-5 text-green-600 rounded">
-          </div>
-          <div class="flex items-center p-2 bg-gray-50 rounded-md shadow-sm">
-            <span class="font-bold w-16 flex-shrink-0">21:00</span>
-            <span class="flex-grow">수입금 보고</span>
-            <input type="text" placeholder="메모" class="flex-grow mx-2 p-1 border border-gray-300 rounded-md text-sm">
-            <input type="checkbox" class="ml-2 h-5 w-5 text-green-600 rounded">
-          </div>
-          <div class="flex items-center p-2 bg-gray-50 rounded-md shadow-sm">
-            <span class="font-bold w-16 flex-shrink-0">23:00</span>
-            <span class="flex-grow">최종 매표실 정리</span>
-            <input type="text" placeholder="메모" class="flex-grow mx-2 p-1 border border-gray-300 rounded-md text-sm">
-            <input type="checkbox" class="ml-2 h-5 w-5 text-green-600 rounded">
-          </div>
+          <!-- 매표 야간 업무를 여기에 추가해주세요. -->
         </div>
       </div>
     </div>
@@ -261,7 +317,7 @@
     // DOM 요소 참조
     const patternSelectionPage = document.getElementById('pattern-selection-page');
     const calendarPage = document.getElementById('calendar-page');
-    const taskPage = document.getElementById('task-page'); // 새로운 업무 관리 페이지
+    const taskPage = document.getElementById('task-page');
 
     const goToCalendarBtn = document.getElementById('goToCalendarBtn');
     const backToSelectionBtn = document.getElementById('backToSelectionBtn');
@@ -273,7 +329,7 @@
     const nextMonthBtn = document.getElementById('nextMonthBtn');
 
     // 업무 페이지 관련 DOM 요소
-    const goToTasksPageBtn = document.getElementById('goToTasksPageBtn'); // 통합된 다음 페이지 버튼
+    const goToTasksPageBtn = document.getElementById('goToTasksPageBtn');
     const backToCalendarBtn = document.getElementById('backToCalendarBtn');
     const taskPageTitle = document.getElementById('taskPageTitle');
 
@@ -282,23 +338,26 @@
     const showInfoSectionBtn = document.getElementById('showInfoSectionBtn');
     const showTicketingSectionBtn = document.getElementById('showTicketingSectionBtn');
 
-    // 안내 업무 하위 섹션 (상행/하행)
-    const upboundInfoSection = document.getElementById('upbound-info-section');
-    const downboundInfoSection = document.getElementById('downbound-info-section');
-    const showUpboundInfoBtn = document.getElementById('showUpboundInfoBtn');
-    const showDownboundInfoBtn = document.getElementById('showDownboundInfoBtn');
+    // 안내 업무 - 주간/야간 선택 버튼
+    const showInfoDayShiftBtn = document.getElementById('showInfoDayShiftBtn');
+    const showInfoNightShiftBtn = document.getElementById('showInfoNightShiftBtn');
 
-    // 안내 업무 - 상행 교대 근무
+    // 안내 업무 - 주간/야간 시프트 컨테이너
+    const infoDayShiftContainer = document.getElementById('info-day-shift-container');
+    const infoNightShiftContainer = document.getElementById('info-night-shift-container');
+
+    // 안내 업무 - 주간 시프트 내 상행/하행 버튼
+    const showInfoDayUpboundBtn = document.getElementById('showInfoDayUpboundBtn');
+    const showInfoDayDownboundBtn = document.getElementById('showInfoDayDownboundBtn');
+    // 안내 업무 - 야간 시프트 내 상행/하행 버튼
+    const showInfoNightUpboundBtn = document.getElementById('showInfoNightUpboundBtn');
+    const showInfoNightDownboundBtn = document.getElementById('showInfoNightDownboundBtn');
+
+    // 안내 업무 - 실제 업무 목록 (상행/하행, 주간/야간 조합)
     const upboundInfoDayShiftTasks = document.getElementById('upbound-info-day-shift-tasks');
-    const upboundInfoNightShiftTasks = document.getElementById('upbound-info-night-shift-tasks');
-    const showUpboundInfoDayShiftBtn = document.getElementById('showUpboundInfoDayShiftBtn');
-    const showUpboundInfoNightShiftBtn = document.getElementById('showUpboundInfoNightShiftBtn');
-
-    // 안내 업무 - 하행 교대 근무
     const downboundInfoDayShiftTasks = document.getElementById('downbound-info-day-shift-tasks');
+    const upboundInfoNightShiftTasks = document.getElementById('upbound-info-night-shift-tasks');
     const downboundInfoNightShiftTasks = document.getElementById('downbound-info-night-shift-tasks');
-    const showDownboundInfoDayShiftBtn = document.getElementById('showDownboundInfoDayShiftBtn');
-    const showDownboundInfoNightShiftBtn = document.getElementById('showDownboundInfoNightShiftBtn');
 
     // 매표 업무 교대 근무
     const ticketingDayShiftTasks = document.getElementById('ticketing-day-shift-tasks');
@@ -331,7 +390,7 @@
     function showPage(pageId) {
       patternSelectionPage.style.display = 'none';
       calendarPage.style.display = 'none';
-      taskPage.style.display = 'none'; // 새로운 페이지도 숨김 처리
+      taskPage.style.display = 'none';
       document.getElementById(pageId).style.display = 'block';
     }
 
@@ -464,39 +523,60 @@
       document.getElementById(sectionId).style.display = 'block';
       taskPageTitle.textContent = (sectionId === 'info-section' ? '안내 업무' : '매표 업무') + ' 관리';
 
-      // 섹션 변경 시 기본적으로 첫 번째 하위 섹션 (안내: 상행, 매표: 주간)을 표시
+      // 섹션 변경 시 기본적으로 첫 번째 하위 섹션 (안내: 주간, 매표: 주간)을 표시
       if (sectionId === 'info-section') {
-        showSubTaskSection('upbound-info-section'); // 안내는 상행 먼저
+        showInfoShiftType('day'); // 안내는 주간 먼저
       } else {
-        showShiftTasks('ticketing-day-shift-tasks'); // 매표는 주간 먼저
+        showTicketingShiftTasks('day'); // 매표는 주간 먼저
       }
     }
 
-    // 안내 업무 내 상행/하행 섹션 표시 관리 함수
-    function showSubTaskSection(subSectionId) {
-        upboundInfoSection.style.display = 'none';
-        downboundInfoSection.style.display = 'none';
-        document.getElementById(subSectionId).style.display = 'block';
+    // 안내 업무 내 주간/야간 교대 근무 섹션 표시 관리 함수
+    function showInfoShiftType(shiftType) {
+        infoDayShiftContainer.style.display = 'none';
+        infoNightShiftContainer.style.display = 'none';
 
-        // 하위 섹션 변경 시 기본적으로 주간 업무를 표시
-        if (subSectionId === 'upbound-info-section') {
-            showShiftTasks('upbound-info-day-shift-tasks');
-        } else if (subSectionId === 'downbound-info-section') {
-            showShiftTasks('downbound-info-day-shift-tasks');
+        if (shiftType === 'day') {
+            infoDayShiftContainer.style.display = 'block';
+            // 주간 선택 시 상행 먼저 표시
+            showInfoDirection('day', 'upbound');
+        } else if (shiftType === 'night') {
+            infoNightShiftContainer.style.display = 'block';
+            // 야간 선택 시 상행 먼저 표시
+            showInfoDirection('night', 'upbound');
         }
     }
 
-    function showShiftTasks(shiftId) {
-      // 모든 교대 근무 목록 숨김
-      upboundInfoDayShiftTasks.style.display = 'none';
-      upboundInfoNightShiftTasks.style.display = 'none';
-      downboundInfoDayShiftTasks.style.display = 'none';
-      downboundInfoNightShiftTasks.style.display = 'none';
+    // 안내 업무 내 상행/하행 업무 목록 표시 관리 함수
+    function showInfoDirection(shiftType, direction) {
+        // 모든 안내 업무 목록 숨김
+        upboundInfoDayShiftTasks.style.display = 'none';
+        downboundInfoDayShiftTasks.style.display = 'none';
+        upboundInfoNightShiftTasks.style.display = 'none';
+        downboundInfoNightShiftTasks.style.display = 'none';
+
+        // 선택된 업무 목록만 표시
+        if (shiftType === 'day' && direction === 'upbound') {
+            upboundInfoDayShiftTasks.style.display = 'block';
+        } else if (shiftType === 'day' && direction === 'downbound') {
+            downboundInfoDayShiftTasks.style.display = 'block';
+        } else if (shiftType === 'night' && direction === 'upbound') {
+            upboundInfoNightShiftTasks.style.display = 'block';
+        } else if (shiftType === 'night' && direction === 'downbound') {
+            downboundInfoNightShiftTasks.style.display = 'block';
+        }
+    }
+
+    // 매표 업무 교대 근무 목록 표시 관리 함수
+    function showTicketingShiftTasks(shiftType) {
       ticketingDayShiftTasks.style.display = 'none';
       ticketingNightShiftTasks.style.display = 'none';
 
-      // 선택된 교대 근무 목록만 표시
-      document.getElementById(shiftId).style.display = 'block';
+      if (shiftType === 'day') {
+        ticketingDayShiftTasks.style.display = 'block';
+      } else if (shiftType === 'night') {
+        ticketingNightShiftTasks.style.display = 'block';
+      }
     }
 
     // 캘린더에서 업무 페이지로 이동하는 통합 버튼 이벤트 리스너
@@ -509,21 +589,21 @@
     showInfoSectionBtn.addEventListener('click', () => showTaskSection('info-section'));
     showTicketingSectionBtn.addEventListener('click', () => showTaskSection('ticketing-section'));
 
-    // 안내 업무 내 상행/하행 버튼 이벤트 리스너
-    showUpboundInfoBtn.addEventListener('click', () => showSubTaskSection('upbound-info-section'));
-    showDownboundInfoBtn.addEventListener('click', () => showSubTaskSection('downbound-info-section'));
+    // 안내 업무 - 주간/야간 버튼 이벤트 리스너
+    showInfoDayShiftBtn.addEventListener('click', () => showInfoShiftType('day'));
+    showInfoNightShiftBtn.addEventListener('click', () => showInfoShiftType('night'));
 
-    // 안내 업무 - 상행 교대 근무 전환 버튼 이벤트 리스너
-    showUpboundInfoDayShiftBtn.addEventListener('click', () => showShiftTasks('upbound-info-day-shift-tasks'));
-    showUpboundInfoNightShiftBtn.addEventListener('click', () => showShiftTasks('upbound-info-night-shift-tasks'));
+    // 안내 업무 - 주간 시프트 내 상행/하행 버튼 이벤트 리스너
+    showInfoDayUpboundBtn.addEventListener('click', () => showInfoDirection('day', 'upbound'));
+    showInfoDayDownboundBtn.addEventListener('click', () => showInfoDirection('day', 'downbound'));
 
-    // 안내 업무 - 하행 교대 근무 전환 버튼 이벤트 리스너
-    showDownboundInfoDayShiftBtn.addEventListener('click', () => showShiftTasks('downbound-info-day-shift-tasks'));
-    showDownboundInfoNightShiftBtn.addEventListener('click', () => showShiftTasks('downbound-info-night-shift-tasks'));
+    // 안내 업무 - 야간 시프트 내 상행/하행 버튼 이벤트 리스너
+    showInfoNightUpboundBtn.addEventListener('click', () => showInfoDirection('night', 'upbound'));
+    showInfoNightDownboundBtn.addEventListener('click', () => showInfoDirection('night', 'downbound'));
 
     // 매표 업무 교대 근무 전환 버튼 이벤트 리스너
-    showTicketingDayShiftBtn.addEventListener('click', () => showShiftTasks('ticketing-day-shift-tasks'));
-    showTicketingNightShiftBtn.addEventListener('click', () => showShiftTasks('ticketing-night-shift-tasks'));
+    showTicketingDayShiftBtn.addEventListener('click', () => showTicketingShiftTasks('day'));
+    showTicketingNightShiftBtn.addEventListener('click', () => showTicketingShiftTasks('night'));
 
     // 업무 페이지에서 캘린더 페이지로 돌아가는 버튼 이벤트 리스너
     backToCalendarBtn.addEventListener('click', () => {
