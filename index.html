@@ -14,8 +14,38 @@
   </style>
 </head>
 <body class="font-sans m-0 p-0 bg-gray-100 text-gray-800">
-  <div class="container max-w-4xl mx-auto my-5 p-5 bg-white rounded-lg shadow-lg">
-    <h1 class="text-center text-3xl font-extrabold mb-6 text-gray-900">철도 근무 스케줄 캘린더</h1>
+
+  <!-- 첫 번째 페이지: 조 선택 -->
+  <div id="pattern-selection-page" class="container max-w-md mx-auto my-20 p-8 bg-white rounded-lg shadow-lg flex flex-col items-center justify-center">
+    <h1 class="text-center text-3xl font-extrabold mb-8 text-gray-900">근무조 선택</h1>
+
+    <div class="pattern-select flex flex-col gap-4 mb-8 p-6 bg-blue-50 rounded-lg shadow-inner w-full">
+      <label class="flex items-center space-x-3 text-xl text-gray-700">
+        <input type="radio" name="selectPattern" value="A" checked class="form-radio h-6 w-6 text-blue-600">
+        <span>A조</span>
+      </label>
+      <label class="flex items-center space-x-3 text-xl text-gray-700">
+        <input type="radio" name="selectPattern" value="B" class="form-radio h-6 w-6 text-blue-600">
+        <span>B조</span>
+      </label>
+      <label class="flex items-center space-x-3 text-xl text-gray-700">
+        <input type="radio" name="selectPattern" value="C" class="form-radio h-6 w-6 text-blue-600">
+        <span>C조</span>
+      </label>
+      <label class="flex items-center space-x-3 text-xl text-gray-700">
+        <input type="radio" name="selectPattern" value="D" class="form-radio h-6 w-6 text-blue-600">
+        <span>D조</span>
+      </label>
+    </div>
+
+    <button id="goToCalendarBtn" class="px-8 py-3 bg-green-500 text-white text-xl font-semibold rounded-lg shadow-md hover:bg-green-600 transition-colors duration-200">
+      캘린더 보기
+    </button>
+  </div>
+
+  <!-- 두 번째 페이지: 캘린더 -->
+  <div id="calendar-page" class="container max-w-4xl mx-auto my-5 p-5 bg-white rounded-lg shadow-lg" style="display: none;">
+    <h1 class="text-center text-3xl font-extrabold mb-6 text-gray-900">철도 근무 스케줄 캘린더 (<span id="selectedTeamDisplay">A조</span>)</h1>
 
     <!-- 현재 표시 월/년도 및 월 이동 버튼 -->
     <div class="flex justify-between items-center mb-4">
@@ -27,35 +57,28 @@
     <!-- 오늘 날짜를 표시하는 영역 -->
     <div id="today-date" class="text-center text-lg font-semibold mb-4 text-blue-600"></div>
 
-    <!-- 근무 패턴 선택 라디오 버튼 -->
-    <div class="pattern-select flex justify-center gap-6 mt-4 mb-6 p-3 bg-blue-50 rounded-lg shadow-inner">
-      <label class="flex items-center space-x-2 text-lg text-gray-700">
-        <input type="radio" name="pattern" value="A" checked class="form-radio h-5 w-5 text-blue-600">
-        <span>A</span>
-      </label>
-      <label class="flex items-center space-x-2 text-lg text-gray-700">
-        <input type="radio" name="pattern" value="B" class="form-radio h-5 w-5 text-blue-600">
-        <span>B</span>
-      </label>
-      <label class="flex items-center space-x-2 text-lg text-gray-700">
-        <input type="radio" name="pattern" value="C" class="form-radio h-5 w-5 text-blue-600">
-        <span>C</span>
-      </label>
-      <label class="flex items-center space-x-2 text-lg text-gray-700">
-        <input type="radio" name="pattern" value="D" class="form-radio h-5 w-5 text-blue-600">
-        <span>D</span>
-      </label>
-    </div>
-
     <!-- 요일 라벨 -->
     <div class="day-labels grid grid-cols-7 font-bold text-center mt-5 text-gray-700 text-base py-2 border-b border-gray-300">
       <div>월</div><div>화</div><div>수</div><div>목</div><div>금</div><div>토</div><div>일</div>
     </div>
     <!-- 캘린더 날짜가 표시될 영역 -->
     <div id="calendar" class="grid grid-cols-7 gap-1 mt-2"></div>
+
+    <!-- 이전 페이지로 돌아가는 버튼 -->
+    <div class="flex justify-center mt-8">
+      <button id="backToSelectionBtn" class="px-6 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400 transition-colors duration-200">
+        이전 페이지
+      </button>
+    </div>
   </div>
 
   <script>
+    const patternSelectionPage = document.getElementById('pattern-selection-page');
+    const calendarPage = document.getElementById('calendar-page');
+    const goToCalendarBtn = document.getElementById('goToCalendarBtn');
+    const backToSelectionBtn = document.getElementById('backToSelectionBtn');
+    const selectedTeamDisplay = document.getElementById('selectedTeamDisplay');
+
     const calendarEl = document.getElementById('calendar');
     const todayDateEl = document.getElementById('today-date');
     const currentMonthYearEl = document.getElementById('currentMonthYear');
@@ -64,6 +87,7 @@
 
     // 현재 캘린더에 표시될 년도와 월을 추적하는 변수
     let currentDisplayDate = new Date(); // 초기값은 현재 날짜
+    let selectedPatternKey = 'A'; // 선택된 조 (기본값 A)
 
     // 각 근무 패턴 정의 (약어 적용)
     const shiftPatterns = {
@@ -81,9 +105,11 @@
       'D': '비'  // 비번
     };
 
-    // 현재 선택된 패턴 키 (A, B, C, D)를 가져오는 함수
-    function getSelectedPatternKey() {
-      return document.querySelector('input[name="pattern"]:checked').value;
+    // 페이지 전환 함수
+    function showPage(pageId) {
+      patternSelectionPage.style.display = 'none';
+      calendarPage.style.display = 'none';
+      document.getElementById(pageId).style.display = 'block';
     }
 
     // 캘린더를 렌더링하는 함수
@@ -101,12 +127,14 @@
       // 오늘 날짜를 상단에 표시 (이것은 항상 '오늘'을 의미)
       todayDateEl.textContent = `${currentYear}년 ${currentMonth + 1}월 ${currentDayOfMonth}일`;
 
+      // 선택된 조를 캘린더 페이지 제목에 표시
+      selectedTeamDisplay.textContent = `${selectedPatternKey}조`;
+
       const firstDayOfMonth = new Date(displayYear, displayMonth, 1); // 현재 표시 월의 첫째 날
       const lastDayOfMonth = new Date(displayYear, displayMonth + 1, 0); // 현재 표시 월의 마지막 날
       const daysInMonth = lastDayOfMonth.getDate(); // 현재 표시 월의 총 일수
       calendarEl.innerHTML = ''; // 캘린더 초기화
 
-      const selectedPatternKey = getSelectedPatternKey();
       const currentShiftPattern = shiftPatterns[selectedPatternKey];
       const patternLength = currentShiftPattern.length; // 패턴 길이 (항상 4)
 
@@ -179,6 +207,24 @@
       }
     }
 
+    // "캘린더 보기" 버튼 클릭 이벤트
+    goToCalendarBtn.addEventListener('click', () => {
+      const selectedRadio = document.querySelector('input[name="selectPattern"]:checked');
+      if (selectedRadio) {
+        selectedPatternKey = selectedRadio.value;
+        currentDisplayDate = new Date(); // 캘린더 페이지로 이동 시 현재 월로 초기화
+        showPage('calendar-page');
+        renderCalendar();
+      } else {
+        alert('조를 선택해주세요.');
+      }
+    });
+
+    // "이전 페이지" 버튼 클릭 이벤트
+    backToSelectionBtn.addEventListener('click', () => {
+      showPage('pattern-selection-page');
+    });
+
     // 이전 달 버튼 클릭 이벤트
     prevMonthBtn.addEventListener('click', () => {
       currentDisplayDate.setMonth(currentDisplayDate.getMonth() - 1);
@@ -191,13 +237,8 @@
       renderCalendar();
     });
 
-    // 페이지 로드 시 초기 캘린더 렌더링
-    renderCalendar();
-
-    // 근무 패턴 라디오 버튼 변경 시 캘린더 다시 렌더링
-    document.querySelectorAll('input[name="pattern"]').forEach(radio => {
-      radio.addEventListener('change', renderCalendar);
-    });
+    // 초기 페이지 로드 시 조 선택 페이지 표시
+    showPage('pattern-selection-page');
   </script>
 </body>
 </html>
