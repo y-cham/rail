@@ -78,79 +78,7 @@
     </div>
   </div>
 
-  <script type="module">
-    // Firebase SDK imports
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-    import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-    import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-    // Canvas 환경에서 제공되는 전역 변수 (필수 사용)
-    const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-    const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
-    const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-
-    // Firebase 초기화 (스크립트 로드 시 즉시 실행)
-    let app;
-    let db;
-    let auth;
-    let userId = null; // 현재 로그인된 사용자 ID
-    let isFirebaseReady = false; // Firebase 초기화 및 인증 완료 여부
-
-    try {
-      if (Object.keys(firebaseConfig).length > 0) {
-        app = initializeApp(firebaseConfig);
-        db = getFirestore(app);
-        auth = getAuth(app);
-
-        // 인증 상태 변경 리스너
-        onAuthStateChanged(auth, (user) => {
-          if (user) {
-            userId = user.uid;
-            isFirebaseReady = true;
-            userIdDisplayEl.textContent = `사용자 ID: ${userId}`;
-            loadingMessageEl.style.display = 'none'; // 로딩 메시지 숨김
-            console.log("Firebase authenticated. User ID:", userId);
-            
-            // 캘린더 페이지가 활성화된 경우 데이터 로드 및 렌더링
-            if (calendarPage.style.display === 'block') {
-                loadAndRenderCalendar();
-            }
-          } else {
-            // 사용자 없으면 익명 로그인 시도
-            console.log("No user signed in. Attempting anonymous sign-in.");
-            userId = null; // 사용자 ID 초기화
-            isFirebaseReady = false; // 인증 미완료 상태로 설정
-            userIdDisplayEl.textContent = '인증 대기 중...';
-            loadingMessageEl.textContent = '데이터 로딩 중...';
-
-            // 익명 로그인 시도
-            (async () => {
-                try {
-                    if (initialAuthToken) {
-                        await signInWithCustomToken(auth, initialAuthToken);
-                        console.log("Signed in with custom token.");
-                    } else {
-                        await signInAnonymously(auth);
-                        console.log("Signed in anonymously.");
-                    }
-                } catch (anonError) {
-                    console.error("Anonymous sign-in failed:", anonError);
-                    loadingMessageEl.textContent = `인증 오류: ${anonError.message}`;
-                }
-            })();
-          }
-        });
-        console.log("Firebase initialization started.");
-      } else {
-        console.error("Firebase config is missing or empty. Data persistence will not work.");
-        loadingMessageEl.textContent = 'Firebase 설정 오류: 데이터 저장이 불가능합니다.';
-        // Firebase가 준비되지 않았으므로 isFirebaseReady는 false로 유지
-      }
-    } catch (error) {
-      console.error("Error initializing Firebase:", error);
-      loadingMessageEl.textContent = `Firebase 초기화 오류: ${error.message}`;
-      // Firebase가 준비되지 않았으므로 isFirebaseReady는 false로 유지
-    }
 
     // DOM 요소 참조
     const patternSelectionPage = document.getElementById('pattern-selection-page');
@@ -164,7 +92,6 @@
     const prevMonthBtn = document.getElementById('prevMonthBtn');
     const nextMonthBtn = document.getElementById('nextMonthBtn');
     const loadingMessageEl = document.getElementById('loading-message');
-    const userIdDisplayEl = document.getElementById('user-id-display');
 
     // 전역 변수
     let currentDisplayDate = new Date(); // 현재 캘린더에 표시될 년도와 월을 추적
@@ -194,61 +121,7 @@
       document.getElementById(pageId).style.display = 'block';
     }
 
-    // 근무 형태를 Firestore에 저장하는 함수
-    async function saveShift(year, month, day, shiftValue) {
-      // Firebase가 준비되지 않았거나 userId가 없으면 저장 불가
-      if (!isFirebaseReady || !userId) {
-        console.warn("Firebase not ready or user not authenticated. Cannot save shift.");
-        alert("데이터를 저장할 수 없습니다. 잠시 후 다시 시도해주세요.");
-        return;
-      }
-      const monthKey = `${year}-${String(month + 1).padStart(2, '0')}`;
-      // Firestore 경로: artifacts/{appId}/users/{userId}/shifts/{YYYY-MM}
-      const docRef = doc(db, 'artifacts', appId, 'users', userId, 'shifts', monthKey);
-      try {
-        await setDoc(docRef, { [String(day)]: shiftValue }, { merge: true });
-        console.log(`Shift for ${monthKey}, day ${day} saved successfully.`);
-      } catch (error) {
-        console.error("Error saving shift:", error);
-        alert("근무 정보 저장 중 오류가 발생했습니다.");
-      }
-    }
 
-    // Firestore에서 근무 형태를 로드하는 함수 (onSnapshot 사용)
-    let unsubscribeFromShifts = null; // 이전 월의 리스너를 해제하기 위한 변수
-
-    function loadShiftsForMonth(year, month) {
-      if (unsubscribeFromShifts) {
-        unsubscribeFromShifts(); // 이전 월의 리스너 해제
-      }
-
-      // Firebase가 준비되지 않았거나 userId가 없으면 저장된 데이터 없음
-      if (!isFirebaseReady || !userId) {
-        console.warn("Firebase not ready or user not authenticated. Loading default shifts.");
-        customShiftsForCurrentMonth = new Map(); // 저장된 데이터 없음
-        renderCalendarDays(); // 기본 패턴으로 캘린더 날짜 렌더링
-        return;
-      }
-
-      const monthKey = `${year}-${String(month + 1).padStart(2, '0')}`;
-      const docRef = doc(db, 'artifacts', appId, 'users', userId, 'shifts', monthKey);
-
-      unsubscribeFromShifts = onSnapshot(docRef, (docSnap) => {
-        if (docSnap.exists()) {
-          customShiftsForCurrentMonth = new Map(Object.entries(docSnap.data()));
-          console.log("Custom shifts loaded:", customShiftsForCurrentMonth);
-        } else {
-          customShiftsForCurrentMonth = new Map(); // 해당 월에 저장된 데이터 없음
-          console.log("No custom shifts found for this month.");
-        }
-        renderCalendarDays(); // 로드된 데이터를 적용하여 캘린더 날짜 다시 렌더링
-      }, (error) => {
-        console.error("Error loading shifts:", error);
-        alert("근무 정보 로드 중 오류가 발생했습니다.");
-        customShiftsForCurrentMonth = new Map(); // 오류 발생 시 초기화
-        renderCalendarDays();
-      });
-    }
 
     // 캘린더의 날짜 부분만 렌더링하는 함수 (데이터 로드 후 호출)
     function renderCalendarDays() {
@@ -300,39 +173,10 @@
         const shiftIndexForCurrentDay = (startingShiftIndexForFirstDayOfMonth + (i - 1)) % patternLength;
         let shift = currentShiftPattern[shiftIndexForCurrentDay]; // 기본 패턴 근무
 
-        // Firestore에서 로드된 사용자 정의 근무가 있다면 적용
-        // 단, Firebase가 준비되고 userId가 있을 때만 적용
-        if (isFirebaseReady && userId && customShiftsForCurrentMonth.has(String(i))) {
-          shift = customShiftsForCurrentMonth.get(String(i));
-        }
-
-        dayEl.innerHTML = `
-          <span class="absolute top-1 right-2 text-sm text-gray-600 font-medium">${i}</span>
-          <div class="shift mt-5 font-bold text-base text-center text-blue-800">${shift}</div>
-        `;
-
-        dayEl.addEventListener('click', () => {
-          // Firebase가 준비되지 않았거나 userId가 없으면 저장 불가 메시지 표시
-          if (!isFirebaseReady || !userId) {
-            alert("근무를 저장하려면 데이터베이스 연결이 필요합니다. 잠시 기다려주세요.");
-            return;
-          }
-
           const validShifts = ['주', '야', '비', '휴', '지주', '지야', '초주', '초야'];
           const newShift = prompt(`근무 형태를 입력하세요 (${validShifts.join('/')}):`, shift);
           
-          if (newShift !== null && validShifts.includes(newShift)) {
-            dayEl.querySelector('.shift').textContent = newShift;
-            saveShift(displayYear, displayMonth, i, newShift); // 변경된 근무 저장
-          } else if (newShift !== null) {
-            alert(`유효한 근무 형태를 입력해주세요: ${validShifts.join(', ')}`);
-          }
-        });
-
-        calendarEl.appendChild(dayEl);
-      }
-    }
-
+   
     // 캘린더 구조 (월/년도, 오늘 날짜, 조 표시)를 렌더링하는 함수
     function renderCalendarStructure() {
       const displayYear = currentDisplayDate.getFullYear();
