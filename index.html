@@ -367,6 +367,7 @@
 
     // "캘린더 보기" 버튼 클릭 이벤트
     goToCalendarBtn.addEventListener('click', () => {
+      console.log("캘린더 보기 button clicked!"); // 디버깅을 위한 로그
       const selectedRadio = document.querySelector('input[name="selectPattern"]:checked');
       if (selectedRadio) {
         selectedPatternKey = selectedRadio.value;
