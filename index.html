@@ -23,8 +23,7 @@
     h1 {
       text-align: center;
     }
-    label, input, select {
-      display: block;
+    label, select {
       margin: 10px auto;
       font-size: 1rem;
     }
@@ -61,17 +60,24 @@
       text-align: center;
       margin-top: 20px;
     }
+    .pattern-select {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      margin-top: 15px;
+    }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>철도 근무 스케줄 캘린더</h1>
 
-    <label>근무 순서를 설정하세요:</label>
-    <select id="shift1"><option>주간</option><option>야간</option><option>비번</option><option>휴무</option></select>
-    <select id="shift2"><option>야간</option><option>비번</option><option>휴무</option><option>주간</option></select>
-    <select id="shift3"><option>비번</option><option>휴무</option><option>주간</option><option>야간</option></select>
-    <select id="shift4"><option>휴무</option><option>주간</option><option>야간</option><option>비번</option></select>
+    <div class="pattern-select">
+      <label><input type="radio" name="pattern" value="A" checked> A: 주간-야간-비번-휴무</label>
+      <label><input type="radio" name="pattern" value="B"> B: 야간-비번-휴무-주간</label>
+      <label><input type="radio" name="pattern" value="C"> C: 비번-휴무-주간-야간</label>
+      <label><input type="radio" name="pattern" value="D"> D: 휴무-주간-야간-비번</label>
+    </div>
 
     <div class="day-labels">
       <div>월</div><div>화</div><div>수</div><div>목</div><div>금</div><div>토</div><div>일</div>
@@ -83,12 +89,14 @@
     const calendarEl = document.getElementById('calendar');
 
     function getShiftPattern() {
-      return [
-        document.getElementById('shift1').value,
-        document.getElementById('shift2').value,
-        document.getElementById('shift3').value,
-        document.getElementById('shift4').value
-      ];
+      const pattern = document.querySelector('input[name="pattern"]:checked').value;
+      switch (pattern) {
+        case 'A': return ['주간', '야간', '비번', '휴무'];
+        case 'B': return ['야간', '비번', '휴무', '주간'];
+        case 'C': return ['비번', '휴무', '주간', '야간'];
+        case 'D': return ['휴무', '주간', '야간', '비번'];
+        default: return ['주간', '야간', '비번', '휴무'];
+      }
     }
 
     function renderCalendar() {
@@ -103,7 +111,7 @@
       const shiftPattern = getShiftPattern();
       let currentShiftIndex = 0;
 
-      // 요일 보정: 월(1)~일(0)을 월~일 순서로 맞추기 위해
+      // 월요일 시작 보정
       let emptyStart = (firstDay.getDay() + 6) % 7;
       for (let i = 0; i < emptyStart; i++) {
         const blank = document.createElement('div');
@@ -119,7 +127,6 @@
 
         dayEl.innerHTML = `<span>${i}</span><div class="shift">${shift}</div>`;
 
-        // 클릭 시 근무 수동 수정
         dayEl.addEventListener('click', () => {
           const newShift = prompt('근무 형태를 입력하세요 (주간/야간/비번/휴무):', shift);
           if (['주간','야간','비번','휴무'].includes(newShift)) {
@@ -131,12 +138,10 @@
       }
     }
 
-    // 초기에 바로 렌더링
     renderCalendar();
 
-    // 근무 순서 변경 시 캘린더 다시 렌더링
-    document.querySelectorAll('select').forEach(sel => {
-      sel.addEventListener('change', renderCalendar);
+    document.querySelectorAll('input[name="pattern"]').forEach(radio => {
+      radio.addEventListener('change', renderCalendar);
     });
   </script>
 </body>
