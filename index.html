@@ -87,7 +87,7 @@
     <div class="bg-white p-8 rounded-lg shadow-xl w-full max-w-sm">
       <h2 class="text-center text-2xl font-bold mb-6 text-gray-800">로그인 또는 회원가입</h2>
       <input type="email" id="modal-email" placeholder="이메일" class="w-full p-3 mb-4 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-      <input type="password" id="modal-password" placeholder="비밀번호" class="w-full p-3 mb-4 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-500">
+      <input type="password" id="modal-password" placeholder="비밀번호" class="w-full p-3 mb-4 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
       <div id="modal-auth-message" class="text-center text-red-500 mb-4"></div>
       <button id="modal-signUpBtn" class="w-full px-4 py-3 mb-3 bg-blue-500 text-white font-semibold rounded-md hover:bg-blue-600 transition-colors duration-200">회원가입</button>
       <button id="modal-signInBtn" class="w-full px-4 py-3 bg-green-500 text-white font-semibold rounded-md hover:bg-green-600 transition-colors duration-200">로그인</button>
@@ -100,6 +100,34 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
     import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
     import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    // Canvas 환경에서 제공되는 전역 변수 (필수 사용)
+    const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+    const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+
+    // Firebase 초기화 (스크립트 로드 시 즉시 실행)
+    let app;
+    let db;
+    let auth;
+    let isFirebaseConfigValid = false;
+
+    try {
+      if (Object.keys(firebaseConfig).length > 0) {
+        app = initializeApp(firebaseConfig);
+        db = getFirestore(app);
+        auth = getAuth(app);
+        isFirebaseConfigValid = true;
+        console.log("Firebase initialized successfully.");
+      } else {
+        console.error("Firebase config is missing or empty. Data persistence will not work.");
+        loadingMessageEl.textContent = 'Firebase 설정 오류: 데이터 저장이 불가능합니다.';
+        isFirebaseConfigValid = false;
+      }
+    } catch (error) {
+      console.error("Error initializing Firebase:", error);
+      loadingMessageEl.textContent = `Firebase 초기화 오류: ${error.message}`;
+      isFirebaseConfigValid = false;
+    }
 
     // DOM 요소 참조
     const patternSelectionPage = document.getElementById('pattern-selection-page');
@@ -121,24 +149,14 @@
     const modalEmailInput = document.getElementById('modal-email');
     const modalPasswordInput = document.getElementById('modal-password');
     const modalSignUpBtn = document.getElementById('modal-signUpBtn');
-    const modalSignInBtn = document.getElementById('modal-signInBtn');
+    const modalSignInBtn = document = document.getElementById('modal-signInBtn'); // 오타 수정: document = document -> document.getElementById
     const modalAuthMessageEl = document.getElementById('modal-auth-message');
     const closeModalBtn = document.getElementById('close-modal-btn');
 
     // 전역 변수
     let currentDisplayDate = new Date(); // 현재 캘린더에 표시될 년도와 월을 추적
     let selectedPatternKey = 'A'; // 선택된 조 (기본값 A)
-
-    // Firebase 관련 전역 변수
-    let db;
-    let auth;
-    let userId = null; // 초기 사용자 ID는 null
-    let isFirebaseReady = false;
-    let customShiftsForCurrentMonth = new Map(); // 현재 표시 월의 사용자 정의 근무를 저장
-
-    // Canvas 환경에서 제공되는 전역 변수 (필수 사용)
-    const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-    const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+    let userId = null; // 현재 로그인된 사용자 ID
 
     // 각 근무 패턴 정의 (약어 적용)
     const shiftPatterns = {
@@ -156,49 +174,33 @@
       'D': '비'  // 비번
     };
 
-    // Firebase 초기화 및 인증
-    async function initializeFirebase() {
-      try {
-        if (!Object.keys(firebaseConfig).length) {
-          console.error("Firebase config is missing or empty. Data persistence will not work.");
-          loadingMessageEl.textContent = 'Firebase 설정 오류: 데이터 저장이 불가능합니다.';
-          return;
-        }
-
-        const app = initializeApp(firebaseConfig);
-        db = getFirestore(app);
-        auth = getAuth(app);
-
-        // 인증 상태 변경 리스너
-        onAuthStateChanged(auth, (user) => {
-          if (user) {
-            userId = user.uid;
-            isFirebaseReady = true;
-            userIdDisplayEl.textContent = `사용자 ID: ${userId}`;
-            loadingMessageEl.style.display = 'none'; // 로딩 메시지 숨김
-            authActionBtn.textContent = '로그아웃'; // 로그인 상태일 때 로그아웃 버튼 표시
-            
-            // 캘린더 페이지가 활성화된 경우 데이터 로드 및 렌더링
-            if (calendarPage.style.display === 'block') {
-                loadAndRenderCalendar();
-            }
-          } else {
-            userId = null;
-            isFirebaseReady = false;
-            userIdDisplayEl.textContent = '';
-            loadingMessageEl.textContent = '로그인 필요 (저장 기능)';
-            authActionBtn.textContent = '로그인'; // 로그아웃 상태일 때 로그인 버튼 표시
-            // 캘린더 페이지가 활성화된 경우에도 로그인되지 않은 상태로 캘린더를 렌더링 (저장 기능 비활성화)
-            if (calendarPage.style.display === 'block') {
-                loadAndRenderCalendar(); // 저장된 데이터 없이 기본 패턴으로 렌더링
-            }
+    // Firebase 인증 상태 변경 리스너
+    if (isFirebaseConfigValid) {
+      onAuthStateChanged(auth, (user) => {
+        if (user) {
+          userId = user.uid;
+          userIdDisplayEl.textContent = `사용자 ID: ${userId}`;
+          loadingMessageEl.style.display = 'none'; // 로딩 메시지 숨김
+          authActionBtn.textContent = '로그아웃'; // 로그인 상태일 때 로그아웃 버튼 표시
+          
+          // 캘린더 페이지가 활성화된 경우 데이터 로드 및 렌더링
+          if (calendarPage.style.display === 'block') {
+              loadAndRenderCalendar();
           }
-        });
-
-      } catch (error) {
-        console.error("Error initializing Firebase:", error);
-        loadingMessageEl.textContent = `Firebase 초기화 오류: ${error.message}`;
-      }
+        } else {
+          userId = null;
+          userIdDisplayEl.textContent = '';
+          loadingMessageEl.textContent = '로그인 필요 (저장 기능)';
+          authActionBtn.textContent = '로그인'; // 로그아웃 상태일 때 로그인 버튼 표시
+          // 캘린더 페이지가 활성화된 경우에도 로그인되지 않은 상태로 캘린더를 렌더링 (저장 기능 비활성화)
+          if (calendarPage.style.display === 'block') {
+              loadAndRenderCalendar(); // 저장된 데이터 없이 기본 패턴으로 렌더링
+          }
+        }
+      });
+    } else {
+        // Firebase 설정이 유효하지 않은 경우, 로딩 메시지를 업데이트
+        loadingMessageEl.textContent = 'Firebase 설정이 없어 데이터 저장이 불가능합니다.';
     }
 
     // 페이지 전환 함수
@@ -223,6 +225,10 @@
 
     // 회원가입 처리 (모달 내부)
     modalSignUpBtn.addEventListener('click', async () => {
+      if (!isFirebaseConfigValid) {
+        modalAuthMessageEl.textContent = 'Firebase 설정 오류로 회원가입이 불가능합니다.';
+        return;
+      }
       const email = modalEmailInput.value;
       const password = modalPasswordInput.value;
       if (!email || !password) {
@@ -241,6 +247,10 @@
 
     // 로그인 처리 (모달 내부)
     modalSignInBtn.addEventListener('click', async () => {
+      if (!isFirebaseConfigValid) {
+        modalAuthMessageEl.textContent = 'Firebase 설정 오류로 로그인이 불가능합니다.';
+        return;
+      }
       const email = modalEmailInput.value;
       const password = modalPasswordInput.value;
       if (!email || !password) {
@@ -266,7 +276,6 @@
         try {
           await signOut(auth);
           alert("로그아웃 되었습니다.");
-          // onAuthStateChanged 리스너가 로그아웃 상태를 감지하여 UI 업데이트
         } catch (error) {
           console.error("로그아웃 오류:", error);
           alert("로그아웃 중 오류가 발생했습니다.");
@@ -278,12 +287,19 @@
 
     // 근무 형태를 Firestore에 저장하는 함수
     async function saveShift(year, month, day, shiftValue) {
-      if (!isFirebaseReady || !userId) {
-        console.warn("Firebase not ready or user not authenticated. Cannot save shift.");
-        // 이 경고는 UI에서 이미 처리되므로 alert는 생략
+      if (!userId) { // userId가 없으면 저장 불가
+        console.warn("User not authenticated. Cannot save shift.");
+        // UI에서 이미 모달을 띄우므로 여기서 alert는 불필요
         return;
       }
+      if (!isFirebaseConfigValid) {
+        console.error("Firebase config is invalid. Cannot save shift.");
+        alert("Firebase 설정 오류로 근무 정보를 저장할 수 없습니다.");
+        return;
+      }
+
       const monthKey = `${year}-${String(month + 1).padStart(2, '0')}`;
+      // Firestore 경로: artifacts/{appId}/users/{userId}/shifts/{YYYY-MM}
       const docRef = doc(db, 'artifacts', appId, 'users', userId, 'shifts', monthKey);
       try {
         await setDoc(docRef, { [String(day)]: shiftValue }, { merge: true });
@@ -302,8 +318,8 @@
         unsubscribeFromShifts(); // 이전 월의 리스너 해제
       }
 
-      if (!isFirebaseReady || !userId) {
-        console.warn("Firebase not ready or user not authenticated. Loading default shifts.");
+      if (!userId || !isFirebaseConfigValid) { // userId가 없거나 Firebase 설정이 유효하지 않으면 저장된 데이터 없음
+        console.warn("User not authenticated or Firebase config invalid. Loading default shifts.");
         customShiftsForCurrentMonth = new Map(); // 로그인 안 했으면 저장된 데이터 없음
         renderCalendarDays();
         return;
@@ -466,8 +482,7 @@
       }
     });
 
-    // 초기 페이지 로드 시 Firebase 초기화 및 조 선택 페이지 표시
-    initializeFirebase();
+    // 초기 페이지 로드 시 조 선택 페이지 표시
     showPage('pattern-selection-page');
   </script>
 </body>
