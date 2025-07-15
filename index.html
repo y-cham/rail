@@ -49,7 +49,7 @@
 
     <!-- 로딩 메시지 및 사용자 ID 표시 -->
     <div id="loading-area" class="text-center mt-4 mb-2">
-      <div id="loading-message" class="text-gray-600">데이터 로딩 중...</div>
+      <div id="loading-message" class="text-gray-600"></div>
       <div id="user-id-display" class="text-sm text-gray-500 mt-1"></div>
     </div>
 
@@ -70,18 +70,35 @@
     <!-- 캘린더 날짜가 표시될 영역 -->
     <div id="calendar" class="grid grid-cols-7 gap-1 mt-2"></div>
 
-    <!-- 이전 페이지로 돌아가는 버튼 -->
-    <div class="flex justify-center mt-8">
+    <!-- 하단 버튼: 이전 페이지, 로그인/로그아웃 -->
+    <div class="flex justify-between mt-8">
       <button id="backToSelectionBtn" class="px-6 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400 transition-colors duration-200">
         이전 페이지
       </button>
+      <!-- 로그인 상태에 따라 버튼 텍스트 변경 -->
+      <button id="authActionBtn" class="px-6 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors duration-200">
+        로그인
+      </button>
+    </div>
+  </div>
+
+  <!-- 인증 모달 -->
+  <div id="auth-modal" class="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center z-50" style="display: none;">
+    <div class="bg-white p-8 rounded-lg shadow-xl w-full max-w-sm">
+      <h2 class="text-center text-2xl font-bold mb-6 text-gray-800">로그인 또는 회원가입</h2>
+      <input type="email" id="modal-email" placeholder="이메일" class="w-full p-3 mb-4 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+      <input type="password" id="modal-password" placeholder="비밀번호" class="w-full p-3 mb-4 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-500">
+      <div id="modal-auth-message" class="text-center text-red-500 mb-4"></div>
+      <button id="modal-signUpBtn" class="w-full px-4 py-3 mb-3 bg-blue-500 text-white font-semibold rounded-md hover:bg-blue-600 transition-colors duration-200">회원가입</button>
+      <button id="modal-signInBtn" class="w-full px-4 py-3 bg-green-500 text-white font-semibold rounded-md hover:bg-green-600 transition-colors duration-200">로그인</button>
+      <button id="close-modal-btn" class="w-full px-4 py-3 mt-4 bg-gray-200 text-gray-800 font-semibold rounded-md hover:bg-gray-300 transition-colors duration-200">닫기</button>
     </div>
   </div>
 
   <script type="module">
     // Firebase SDK imports
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-    import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
     import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
     // DOM 요소 참조
@@ -89,6 +106,7 @@
     const calendarPage = document.getElementById('calendar-page');
     const goToCalendarBtn = document.getElementById('goToCalendarBtn');
     const backToSelectionBtn = document.getElementById('backToSelectionBtn');
+    const authActionBtn = document.getElementById('authActionBtn'); // 로그인/로그아웃 버튼
     const selectedTeamDisplay = document.getElementById('selectedTeamDisplay');
     const calendarEl = document.getElementById('calendar');
     const todayDateEl = document.getElementById('today-date');
@@ -98,6 +116,15 @@
     const loadingMessageEl = document.getElementById('loading-message');
     const userIdDisplayEl = document.getElementById('user-id-display');
 
+    // 인증 모달 관련 DOM 요소
+    const authModal = document.getElementById('auth-modal');
+    const modalEmailInput = document.getElementById('modal-email');
+    const modalPasswordInput = document.getElementById('modal-password');
+    const modalSignUpBtn = document.getElementById('modal-signUpBtn');
+    const modalSignInBtn = document.getElementById('modal-signInBtn');
+    const modalAuthMessageEl = document.getElementById('modal-auth-message');
+    const closeModalBtn = document.getElementById('close-modal-btn');
+
     // 전역 변수
     let currentDisplayDate = new Date(); // 현재 캘린더에 표시될 년도와 월을 추적
     let selectedPatternKey = 'A'; // 선택된 조 (기본값 A)
@@ -105,14 +132,13 @@
     // Firebase 관련 전역 변수
     let db;
     let auth;
-    let userId;
+    let userId = null; // 초기 사용자 ID는 null
     let isFirebaseReady = false;
     let customShiftsForCurrentMonth = new Map(); // 현재 표시 월의 사용자 정의 근무를 저장
 
     // Canvas 환경에서 제공되는 전역 변수 (필수 사용)
     const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
     const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
-    const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
     // 각 근무 패턴 정의 (약어 적용)
     const shiftPatterns = {
@@ -144,31 +170,27 @@
         auth = getAuth(app);
 
         // 인증 상태 변경 리스너
-        onAuthStateChanged(auth, async (user) => {
+        onAuthStateChanged(auth, (user) => {
           if (user) {
             userId = user.uid;
-            userIdDisplayEl.textContent = `사용자 ID: ${userId}`;
             isFirebaseReady = true;
+            userIdDisplayEl.textContent = `사용자 ID: ${userId}`;
             loadingMessageEl.style.display = 'none'; // 로딩 메시지 숨김
-            // Firebase 준비 완료 후 캘린더 로드 및 렌더링
-            if (calendarPage.style.display === 'block') { // 캘린더 페이지가 활성화된 경우에만
+            authActionBtn.textContent = '로그아웃'; // 로그인 상태일 때 로그아웃 버튼 표시
+            
+            // 캘린더 페이지가 활성화된 경우 데이터 로드 및 렌더링
+            if (calendarPage.style.display === 'block') {
                 loadAndRenderCalendar();
             }
           } else {
-            console.log("No user signed in. Attempting anonymous sign-in.");
             userId = null;
             isFirebaseReady = false;
-            loadingMessageEl.textContent = '인증 대기 중...';
-            // 익명 로그인 시도
-            try {
-                if (initialAuthToken) {
-                    await signInWithCustomToken(auth, initialAuthToken);
-                } else {
-                    await signInAnonymously(auth);
-                }
-            } catch (anonError) {
-                console.error("Anonymous sign-in failed:", anonError);
-                loadingMessageEl.textContent = `인증 오류: ${anonError.message}`;
+            userIdDisplayEl.textContent = '';
+            loadingMessageEl.textContent = '로그인 필요 (저장 기능)';
+            authActionBtn.textContent = '로그인'; // 로그아웃 상태일 때 로그인 버튼 표시
+            // 캘린더 페이지가 활성화된 경우에도 로그인되지 않은 상태로 캘린더를 렌더링 (저장 기능 비활성화)
+            if (calendarPage.style.display === 'block') {
+                loadAndRenderCalendar(); // 저장된 데이터 없이 기본 패턴으로 렌더링
             }
           }
         });
@@ -186,11 +208,79 @@
       document.getElementById(pageId).style.display = 'block';
     }
 
+    // 인증 모달 표시/숨김 함수
+    function showAuthModal(message = '') {
+      modalAuthMessageEl.textContent = message;
+      authModal.style.display = 'flex';
+      modalEmailInput.value = ''; // 모달 열릴 때 입력 필드 초기화
+      modalPasswordInput.value = '';
+    }
+
+    function hideAuthModal() {
+      authModal.style.display = 'none';
+      modalAuthMessageEl.textContent = '';
+    }
+
+    // 회원가입 처리 (모달 내부)
+    modalSignUpBtn.addEventListener('click', async () => {
+      const email = modalEmailInput.value;
+      const password = modalPasswordInput.value;
+      if (!email || !password) {
+        modalAuthMessageEl.textContent = '이메일과 비밀번호를 입력해주세요.';
+        return;
+      }
+      try {
+        await createUserWithEmailAndPassword(auth, email, password);
+        modalAuthMessageEl.textContent = '회원가입 성공! 자동으로 로그인됩니다.';
+        hideAuthModal(); // 성공 시 모달 닫기
+      } catch (error) {
+        console.error("회원가입 오류:", error);
+        modalAuthMessageEl.textContent = `회원가입 실패: ${error.message}`;
+      }
+    });
+
+    // 로그인 처리 (모달 내부)
+    modalSignInBtn.addEventListener('click', async () => {
+      const email = modalEmailInput.value;
+      const password = modalPasswordInput.value;
+      if (!email || !password) {
+        modalAuthMessageEl.textContent = '이메일과 비밀번호를 입력해주세요.';
+        return;
+      }
+      try {
+        await signInWithEmailAndPassword(auth, email, password);
+        modalAuthMessageEl.textContent = '로그인 성공!';
+        hideAuthModal(); // 성공 시 모달 닫기
+      } catch (error) {
+        console.error("로그인 오류:", error);
+        modalAuthMessageEl.textContent = `로그인 실패: ${error.message}`;
+      }
+    });
+
+    // 모달 닫기 버튼
+    closeModalBtn.addEventListener('click', hideAuthModal);
+
+    // 로그인/로그아웃 버튼 클릭 이벤트
+    authActionBtn.addEventListener('click', async () => {
+      if (userId) { // 로그인 상태일 때 -> 로그아웃
+        try {
+          await signOut(auth);
+          alert("로그아웃 되었습니다.");
+          // onAuthStateChanged 리스너가 로그아웃 상태를 감지하여 UI 업데이트
+        } catch (error) {
+          console.error("로그아웃 오류:", error);
+          alert("로그아웃 중 오류가 발생했습니다.");
+        }
+      } else { // 로그아웃 상태일 때 -> 로그인 모달 표시
+        showAuthModal();
+      }
+    });
+
     // 근무 형태를 Firestore에 저장하는 함수
     async function saveShift(year, month, day, shiftValue) {
       if (!isFirebaseReady || !userId) {
         console.warn("Firebase not ready or user not authenticated. Cannot save shift.");
-        alert("데이터를 저장할 수 없습니다. 잠시 후 다시 시도해주세요.");
+        // 이 경고는 UI에서 이미 처리되므로 alert는 생략
         return;
       }
       const monthKey = `${year}-${String(month + 1).padStart(2, '0')}`;
@@ -205,7 +295,6 @@
     }
 
     // Firestore에서 근무 형태를 로드하는 함수 (onSnapshot 사용)
-    // 이 리스너는 데이터 변경 시 자동으로 캘린더 날짜를 다시 렌더링합니다.
     let unsubscribeFromShifts = null; // 이전 월의 리스너를 해제하기 위한 변수
 
     function loadShiftsForMonth(year, month) {
@@ -214,9 +303,8 @@
       }
 
       if (!isFirebaseReady || !userId) {
-        console.warn("Firebase not ready or user not authenticated. Cannot load shifts.");
-        // Firebase가 준비되지 않았을 때도 캘린더는 기본 패턴으로 렌더링되어야 합니다.
-        customShiftsForCurrentMonth = new Map();
+        console.warn("Firebase not ready or user not authenticated. Loading default shifts.");
+        customShiftsForCurrentMonth = new Map(); // 로그인 안 했으면 저장된 데이터 없음
         renderCalendarDays();
         return;
       }
@@ -232,13 +320,12 @@
           customShiftsForCurrentMonth = new Map(); // 해당 월에 저장된 데이터 없음
           console.log("No custom shifts found for this month.");
         }
-        // 로드된 데이터를 적용하여 캘린더 날짜 다시 렌더링
-        renderCalendarDays();
+        renderCalendarDays(); // 로드된 데이터를 적용하여 캘린더 날짜 다시 렌더링
       }, (error) => {
         console.error("Error loading shifts:", error);
         alert("근무 정보 로드 중 오류가 발생했습니다.");
         customShiftsForCurrentMonth = new Map(); // 오류 발생 시 초기화
-        renderCalendarDays(); // 오류 발생 시에도 기본 캘린더는 표시
+        renderCalendarDays();
       });
     }
 
@@ -293,7 +380,8 @@
         let shift = currentShiftPattern[shiftIndexForCurrentDay]; // 기본 패턴 근무
 
         // Firestore에서 로드된 사용자 정의 근무가 있다면 적용
-        if (customShiftsForCurrentMonth.has(String(i))) {
+        // 단, 로그인이 되어있고 데이터가 로드되었을 때만 적용
+        if (userId && customShiftsForCurrentMonth.has(String(i))) {
           shift = customShiftsForCurrentMonth.get(String(i));
         }
 
@@ -303,6 +391,12 @@
         `;
 
         dayEl.addEventListener('click', () => {
+          if (!userId) { // 로그인이 되어있지 않으면 모달 표시
+            showAuthModal("근무를 저장하려면 로그인해주세요.");
+            return; // 함수 실행 중단
+          }
+
+          // 로그인이 되어있으면 근무 수정 프롬프트 표시
           const validShifts = ['주', '야', '비', '휴', '지주', '지야', '초주', '초야'];
           const newShift = prompt(`근무 형태를 입력하세요 (${validShifts.join('/')}):`, shift);
           
@@ -310,7 +404,7 @@
             dayEl.querySelector('.shift').textContent = newShift;
             saveShift(displayYear, displayMonth, i, newShift); // 변경된 근무 저장
           } else if (newShift !== null) {
-            alert(`유효한 근무 형태를 입력해주세요: ${validShades.join(', ')}`); // 'validShades' -> 'validShifts'로 수정
+            alert(`유효한 근무 형태를 입력해주세요: ${validShifts.join(', ')}`);
           }
         });
 
@@ -357,12 +451,8 @@
         selectedPatternKey = selectedRadio.value;
         currentDisplayDate = new Date(); // 캘린더 페이지로 이동 시 현재 월로 초기화
         showPage('calendar-page');
-        // Firebase가 준비된 경우에만 캘린더 로드 및 렌더링
-        if (isFirebaseReady) {
-            loadAndRenderCalendar();
-        } else {
-            loadingMessageEl.textContent = '데이터 로딩 중... (Firebase 인증 대기)';
-        }
+        // 캘린더를 로드하고 렌더링 (로그인 여부에 따라 데이터 로드 방식이 달라짐)
+        loadAndRenderCalendar();
       } else {
         alert('조를 선택해주세요.');
       }
@@ -370,15 +460,15 @@
 
     // "이전 페이지" 버튼 클릭 이벤트
     backToSelectionBtn.addEventListener('click', () => {
-      showPage('pattern-selection-page');
+      showPage('pattern-selection-page'); // 조 선택 페이지로 돌아감
       if (unsubscribeFromShifts) {
         unsubscribeFromShifts(); // 캘린더 페이지를 떠날 때 Firestore 리스너 해제
       }
     });
 
-    // 초기 페이지 로드 시 조 선택 페이지 표시 및 Firebase 초기화
-    showPage('pattern-selection-page');
+    // 초기 페이지 로드 시 Firebase 초기화 및 조 선택 페이지 표시
     initializeFirebase();
+    showPage('pattern-selection-page');
   </script>
 </body>
 </html>
