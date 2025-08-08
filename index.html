@@ -1,330 +1,81 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-<meta charset="UTF-8">
-<title>2025년 8월 근무표</title>
-<style>
-  body { font-family: Arial, sans-serif; }
-  .calendar {
-    width: 100%;
-    max-width: 900px;
-    margin: 20px auto;
-    border-collapse: collapse;
-    font-size: 14px;
-    border: 1px solid #ccc;
-  }
-  .calendar th, .calendar td {
-    border: 1px solid #ccc;
-    padding: 5px;
-    text-align: center;
-    vertical-align: top;
-    height: 100px;
-  }
-  .calendar th {
-    background-color: #f2f2f2;
-  }
-  .day-header {
-    text-align: left;
-    font-weight: bold;
-    padding: 5px;
-  }
-  .duty-cell {
-    padding: 3px;
-    border-radius: 3px;
-    margin-bottom: 2px;
-    font-weight: bold;
-  }
-  .day { background-color: #e6f7ff; } /* 주간 */
-  .night { background-color: #ffe6f7; } /* 야간 */
-  .off-duty { background-color: #f7ffe6; } /* 비번 */
-  .holiday { background-color: #cccccc; } /* 휴무 */
-  .highlight-A { border: 2px solid green; }
-  .highlight-B { border: 2px solid blue; }
-  .highlight-C { border: 2px solid orange; }
-  .highlight-D { border: 2px solid red; }
-</style>
-</head>
-<body>
+document.getElementById("goToCalendarBtn").addEventListener("click", () => {
+  document.getElementById("pattern-selection-page").style.display = "none";
+  document.getElementById("calendar-page").style.display = "block";
+  // 선택된 근무조 표시
+  const selectedPattern = document.querySelector('input[name="selectPattern"]:checked').value;
+  document.getElementById("selectedTeamDisplay").textContent = selectedPattern + "조";
+});
 
-<h1>2025년 8월 교대 근무 일정표 (4조 2교대)</h1>
+document.getElementById("backToSelectionBtn").addEventListener("click", () => {
+  document.getElementById("calendar-page").style.display = "none";
+  document.getElementById("pattern-selection-page").style.display = "block";
+});
 
-<table class="calendar">
-  <thead>
-    <tr>
-      <th>일</th>
-      <th>월</th>
-      <th>화</th>
-      <th>수</th>
-      <th>목</th>
-      <th>금</th>
-      <th>토</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td class="holiday">
-        <div class="day-header"></div>
-      </td>
-      <td class="day">
-        <div class="day-header"></div>
-      </td>
-      <td class="day">
-        <div class="day-header"></div>
-      </td>
-      <td class="day">
-        <div class="day-header"></div>
-      </td>
-      <td class="day">
-        <div class="day-header"></div>
-      </td>
-      <td>
-        <div class="day-header">1</div>
-        <div class="duty-cell day">A조 주간</div>
-        <div class="duty-cell night">B조 야간</div>
-        <div class="duty-cell off-duty">C조 비번</div>
-        <div class="duty-cell holiday">D조 휴무</div>
-      </td>
-      <td>
-        <div class="day-header">2</div>
-        <div class="duty-cell night">A조 야간</div>
-        <div class="duty-cell off-duty">B조 비번</div>
-        <div class="duty-cell holiday">C조 휴무</div>
-        <div class="duty-cell day">D조 주간</div>
-      </td>
-    </tr>
-    <tr>
-      <td>
-        <div class="day-header">3</div>
-        <div class="duty-cell off-duty">A조 비번</div>
-        <div class="duty-cell holiday">B조 휴무</div>
-        <div class="duty-cell day">C조 주간</div>
-        <div class="duty-cell night">D조 야간</div>
-      </td>
-      <td>
-        <div class="day-header">4</div>
-        <div class="duty-cell holiday">A조 휴무</div>
-        <div class="duty-cell day">B조 주간</div>
-        <div class="duty-cell night">C조 야간</div>
-        <div class="duty-cell off-duty">D조 비번</div>
-      </td>
-      <td>
-        <div class="day-header">5</div>
-        <div class="duty-cell day">A조 주간</div>
-        <div class="duty-cell night">B조 야간</div>
-        <div class="duty-cell off-duty">C조 비번</div>
-        <div class="duty-cell holiday">D조 휴무</div>
-      </td>
-      <td>
-        <div class="day-header">6</div>
-        <div class="duty-cell night">A조 야간</div>
-        <div class="duty-cell off-duty">B조 비번</div>
-        <div class="duty-cell holiday">C조 휴무</div>
-        <div class="duty-cell day">D조 주간</div>
-      </td>
-      <td>
-        <div class="day-header">7</div>
-        <div class="duty-cell off-duty">A조 비번</div>
-        <div class="duty-cell holiday">B조 휴무</div>
-        <div class="duty-cell day">C조 주간</div>
-        <div class="duty-cell night">D조 야간</div>
-      </td>
-      <td>
-        <div class="day-header">8</div>
-        <div class="duty-cell holiday">A조 휴무</div>
-        <div class="duty-cell day">B조 주간</div>
-        <div class="duty-cell night">C조 야간</div>
-        <div class="duty-cell off-duty">D조 비번</div>
-      </td>
-      <td>
-        <div class="day-header">9</div>
-        <div class="duty-cell day">A조 주간</div>
-        <div class="duty-cell night">B조 야간</div>
-        <div class="duty-cell off-duty">C조 비번</div>
-        <div class="duty-cell holiday">D조 휴무</div>
-      </td>
-    </tr>
-    <tr>
-      <td>
-        <div class="day-header">10</div>
-        <div class="duty-cell night">A조 야간</div>
-        <div class="duty-cell off-duty">B조 비번</div>
-        <div class="duty-cell holiday">C조 휴무</div>
-        <div class="duty-cell day">D조 주간</div>
-      </td>
-      <td>
-        <div class="day-header">11</div>
-        <div class="duty-cell off-duty">A조 비번</div>
-        <div class="duty-cell holiday">B조 휴무</div>
-        <div class="duty-cell day">C조 주간</div>
-        <div class="duty-cell night">D조 야간</div>
-      </td>
-      <td>
-        <div class="day-header">12</div>
-        <div class="duty-cell holiday">A조 휴무</div>
-        <div class="duty-cell day">B조 주간</div>
-        <div class="duty-cell night">C조 야간</div>
-        <div class="duty-cell off-duty">D조 비번</div>
-      </td>
-      <td>
-        <div class="day-header">13</div>
-        <div class="duty-cell day">A조 주간</div>
-        <div class="duty-cell night">B조 야간</div>
-        <div class="duty-cell off-duty">C조 비번</div>
-        <div class="duty-cell holiday">D조 휴무</div>
-      </td>
-      <td>
-        <div class="day-header">14</div>
-        <div class="duty-cell night">A조 야간</div>
-        <div class="duty-cell off-duty">B조 비번</div>
-        <div class="duty-cell holiday">C조 휴무</div>
-        <div class="duty-cell day">D조 주간</div>
-      </td>
-      <td>
-        <div class="day-header">15</div>
-        <div class="duty-cell off-duty">A조 비번</div>
-        <div class="duty-cell holiday">B조 휴무</div>
-        <div class="duty-cell day">C조 주간</div>
-        <div class="duty-cell night">D조 야간</div>
-      </td>
-      <td>
-        <div class="day-header">16</div>
-        <div class="duty-cell holiday">A조 휴무</div>
-        <div class="duty-cell day">B조 주간</div>
-        <div class="duty-cell night">C조 야간</div>
-        <div class="duty-cell off-duty">D조 비번</div>
-      </td>
-    </tr>
-    <tr>
-      <td>
-        <div class="day-header">17</div>
-        <div class="duty-cell day">A조 주간</div>
-        <div class="duty-cell night">B조 야간</div>
-        <div class="duty-cell off-duty">C조 비번</div>
-        <div class="duty-cell holiday">D조 휴무</div>
-      </td>
-      <td>
-        <div class="day-header">18</div>
-        <div class="duty-cell night">A조 야간</div>
-        <div class="duty-cell off-duty">B조 비번</div>
-        <div class="duty-cell holiday">C조 휴무</div>
-        <div class="duty-cell day">D조 주간</div>
-      </td>
-      <td>
-        <div class="day-header">19</div>
-        <div class="duty-cell off-duty">A조 비번</div>
-        <div class="duty-cell holiday">B조 휴무</div>
-        <div class="duty-cell day">C조 주간</div>
-        <div class="duty-cell night">D조 야간</div>
-      </td>
-      <td>
-        <div class="day-header">20</div>
-        <div class="duty-cell holiday">A조 휴무</div>
-        <div class="duty-cell day">B조 주간</div>
-        <div class="duty-cell night">C조 야간</div>
-        <div class="duty-cell off-duty">D조 비번</div>
-      </td>
-      <td>
-        <div class="day-header">21</div>
-        <div class="duty-cell day">A조 주간</div>
-        <div class="duty-cell night">B조 야간</div>
-        <div class="duty-cell off-duty">C조 비번</div>
-        <div class="duty-cell holiday">D조 휴무</div>
-      </td>
-      <td>
-        <div class="day-header">22</div>
-        <div class="duty-cell night">A조 야간</div>
-        <div class="duty-cell off-duty">B조 비번</div>
-        <div class="duty-cell holiday">C조 휴무</div>
-        <div class="duty-cell day">D조 주간</div>
-      </td>
-      <td>
-        <div class="day-header">23</div>
-        <div class="duty-cell off-duty">A조 비번</div>
-        <div class="duty-cell holiday">B조 휴무</div>
-        <div class="duty-cell day">C조 주간</div>
-        <div class="duty-cell night">D조 야간</div>
-      </td>
-    </tr>
-    <tr>
-      <td>
-        <div class="day-header">24</div>
-        <div class="duty-cell holiday">A조 휴무</div>
-        <div class="duty-cell day">B조 주간</div>
-        <div class="duty-cell night">C조 야간</div>
-        <div class="duty-cell off-duty">D조 비번</div>
-      </td>
-      <td>
-        <div class="day-header">25</div>
-        <div class="duty-cell day">A조 주간</div>
-        <div class="duty-cell night">B조 야간</div>
-        <div class="duty-cell off-duty">C조 비번</div>
-        <div class="duty-cell holiday">D조 휴무</div>
-      </td>
-      <td>
-        <div class="day-header">26</div>
-        <div class="duty-cell night">A조 야간</div>
-        <div class="duty-cell off-duty">B조 비번</div>
-        <div class="duty-cell holiday">C조 휴무</div>
-        <div class="duty-cell day">D조 주간</div>
-      </td>
-      <td>
-        <div class="day-header">27</div>
-        <div class="duty-cell off-duty">A조 비번</div>
-        <div class="duty-cell holiday">B조 휴무</div>
-        <div class="duty-cell day">C조 주간</div>
-        <div class="duty-cell night">D조 야간</div>
-      </td>
-      <td>
-        <div class="day-header">28</div>
-        <div class="duty-cell holiday">A조 휴무</div>
-        <div class="duty-cell day">B조 주간</div>
-        <div class="duty-cell night">C조 야간</div>
-        <div class="duty-cell off-duty">D조 비번</div>
-      </td>
-      <td>
-        <div class="day-header">29</div>
-        <div class="duty-cell day">A조 주간</div>
-        <div class="duty-cell night">B조 야간</div>
-        <div class="duty-cell off-duty">C조 비번</div>
-        <div class="duty-cell holiday">D조 휴무</div>
-      </td>
-      <td>
-        <div class="day-header">30</div>
-        <div class="duty-cell night">A조 야간</div>
-        <div class="duty-cell off-duty">B조 비번</div>
-        <div class="duty-cell holiday">C조 휴무</div>
-        <div class="duty-cell day">D조 주간</div>
-      </td>
-    </tr>
-    <tr>
-      <td>
-        <div class="day-header">31</div>
-        <div class="duty-cell off-duty">A조 비번</div>
-        <div class="duty-cell holiday">B조 휴무</div>
-        <div class="duty-cell day">C조 주간</div>
-        <div class="duty-cell night">D조 야간</div>
-      </td>
-      <td class="day">
-        <div class="day-header"></div>
-      </td>
-      <td class="day">
-        <div class="day-header"></div>
-      </td>
-      <td class="day">
-        <div class="day-header"></div>
-      </td>
-      <td class="day">
-        <div class="day-header"></div>
-      </td>
-      <td class="day">
-        <div class="day-header"></div>
-      </td>
-      <td class="day">
-        <div class="day-header"></div>
-      </td>
-    </tr>
-  </tbody>
-</table>
+document.getElementById("goToTasksPageBtn").addEventListener("click", () => {
+  document.getElementById("calendar-page").style.display = "none";
+  document.getElementById("task-page").style.display = "block";
+});
+let currentDate = new Date();
+function renderCalendar() {
+  const year = currentDate.getFullYear();
+  const month = currentDate.getMonth();
+  
+  document.getElementById("currentMonthYear").textContent = `${year}년 ${month+1}월`;
+  document.getElementById("today-date").textContent = `오늘: ${new Date().toLocaleDateString()}`;
+  
+  const firstDay = new Date(year, month, 1).getDay(); // 일요일=0
+  const daysInMonth = new Date(year, month+1, 0).getDate();
+  const calendar = document.getElementById("calendar");
+  calendar.innerHTML = "";
+  
+  // 월~일 순서 맞추기 위해 (일요일이 0인데 월요일부터 시작해야 하므로 조정)
+  let blanks = (firstDay + 6) % 7; 
+  for (let i = 0; i < blanks; i++) {
+    calendar.innerHTML += `<div></div>`;
+  }
+  
+  for (let d = 1; d <= daysInMonth; d++) {
+    calendar.innerHTML += `<div class="p-2 text-center border rounded">${d}</div>`;
+  }
+}
 
-</body>
-</html>
+document.getElementById("prevMonthBtn").addEventListener("click", () => {
+  currentDate.setMonth(currentDate.getMonth() - 1);
+  renderCalendar();
+});
+
+document.getElementById("nextMonthBtn").addEventListener("click", () => {
+  currentDate.setMonth(currentDate.getMonth() + 1);
+  renderCalendar();
+});
+
+renderCalendar();// 안내 / 매표
+document.getElementById("showInfoSectionBtn").addEventListener("click", () => {
+  document.getElementById("info-section").style.display = "block";
+  // 매표 섹션 있으면 숨기기
+});
+
+document.getElementById("showTicketingSectionBtn").addEventListener("click", () => {
+  document.getElementById("info-section").style.display = "none";
+  // 매표 섹션 있으면 표시
+});
+
+// 주간 / 야간
+document.getElementById("showInfoDayShiftBtn").addEventListener("click", () => {
+  document.getElementById("info-day-shift-container").style.display = "block";
+  document.getElementById("info-night-shift-container").style.display = "none";
+});
+document.getElementById("showInfoNightShiftBtn").addEventListener("click", () => {
+  document.getElementById("info-day-shift-container").style.display = "none";
+  document.getElementById("info-night-shift-container").style.display = "block";
+});
+
+// 상행 / 하행 (주간 예시)
+document.getElementById("showInfoDayUpboundBtn").addEventListener("click", () => {
+  document.getElementById("upbound-info-day-shift-tasks").style.display = "block";
+  document.getElementById("downbound-info-day-shift-tasks").style.display = "none";
+});
+document.getElementById("showInfoDayDownboundBtn").addEventListener("click", () => {
+  document.getElementById("upbound-info-day-shift-tasks").style.display = "none";
+  document.getElementById("downbound-info-day-shift-tasks").style.display = "block";
+});
