@@ -1,81 +1,177 @@
-document.getElementById("goToCalendarBtn").addEventListener("click", () => {
-  document.getElementById("pattern-selection-page").style.display = "none";
-  document.getElementById("calendar-page").style.display = "block";
-  // 선택된 근무조 표시
-  const selectedPattern = document.querySelector('input[name="selectPattern"]:checked').value;
-  document.getElementById("selectedTeamDisplay").textContent = selectedPattern + "조";
-});
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>근무 스케줄 및 업무 관리</title>
+  <!-- Tailwind CSS CDN을 로드합니다. -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* Inter 폰트를 사용합니다. */
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+  </style>
+</head>
+  <body class="font-sans m-0 p-0 bg-gray-100 text-gray-800">
 
-document.getElementById("backToSelectionBtn").addEventListener("click", () => {
-  document.getElementById("calendar-page").style.display = "none";
-  document.getElementById("pattern-selection-page").style.display = "block";
-});
+  <!-- 첫 번째 페이지: 조 선택 -->
+  <div id="pattern-selection-page" class="container max-w-md mx-auto my-20 p-8 bg-white rounded-lg shadow-lg flex flex-col items-center justify-center">
+    <h1 class="text-center text-3xl font-extrabold mb-8 text-gray-900">근무조 선택</h1>
 
-document.getElementById("goToTasksPageBtn").addEventListener("click", () => {
-  document.getElementById("calendar-page").style.display = "none";
-  document.getElementById("task-page").style.display = "block";
-});
-let currentDate = new Date();
-function renderCalendar() {
-  const year = currentDate.getFullYear();
-  const month = currentDate.getMonth();
-  
-  document.getElementById("currentMonthYear").textContent = `${year}년 ${month+1}월`;
-  document.getElementById("today-date").textContent = `오늘: ${new Date().toLocaleDateString()}`;
-  
-  const firstDay = new Date(year, month, 1).getDay(); // 일요일=0
-  const daysInMonth = new Date(year, month+1, 0).getDate();
-  const calendar = document.getElementById("calendar");
-  calendar.innerHTML = "";
-  
-  // 월~일 순서 맞추기 위해 (일요일이 0인데 월요일부터 시작해야 하므로 조정)
-  let blanks = (firstDay + 6) % 7; 
-  for (let i = 0; i < blanks; i++) {
-    calendar.innerHTML += `<div></div>`;
-  }
-  
-  for (let d = 1; d <= daysInMonth; d++) {
-    calendar.innerHTML += `<div class="p-2 text-center border rounded">${d}</div>`;
-  }
-}
+    <div class="pattern-select flex flex-col gap-4 mb-8 p-6 bg-blue-50 rounded-lg shadow-inner w-full">
+      <label class="flex items-center space-x-3 text-xl text-gray-700">
+        <input type="radio" name="selectPattern" value="A" checked class="form-radio h-6 w-6 text-blue-600">
+        <span>A조</span>
+      </label>
+      <label class="flex items-center space-x-3 text-xl text-gray-700">
+        <input type="radio" name="selectPattern" value="B" class="form-radio h-6 w-6 text-blue-600">
+        <span>B조</span>
+      </label>
+      <label class="flex items-center space-x-3 text-xl text-gray-700">
+        <input type="radio" name="selectPattern" value="C" class="form-radio h-6 w-6 text-blue-600">
+        <span>C조</span>
+      </label>
+      <label class="flex items-center space-x-3 text-xl text-gray-700">
+        <input type="radio" name="selectPattern" value="D" class="form-radio h-6 w-6 text-blue-600">
+        <span>D조</span>
+      </label>
+    </div>
 
-document.getElementById("prevMonthBtn").addEventListener("click", () => {
-  currentDate.setMonth(currentDate.getMonth() - 1);
-  renderCalendar();
-});
+    <button id="goToCalendarBtn" class="px-8 py-3 bg-green-500 text-white text-xl font-semibold rounded-lg shadow-md hover:bg-green-600 transition-colors duration-200">
+      캘린더 보기
+    </button>
+  </div>
+    <!-- 아래 코드를 삭제하세요 -->
+<!-- 로딩 메시지 -->
+<div id="loading-area" class="text-center mt-4 mb-2">
+  <div id="loading-message" class="text-gray-600">캘린더 로딩 중...</div>
+</div>
+  <!-- 세 번째 페이지: 업무 관리 -->
+  <div id="task-page" class="container max-w-4xl mx-auto my-5 p-5 bg-white rounded-lg shadow-lg" style="display: none;">
+    <h1 class="text-center text-3xl font-extrabold mb-6 text-gray-900">업무 관리</h1>
 
-document.getElementById("nextMonthBtn").addEventListener("click", () => {
-  currentDate.setMonth(currentDate.getMonth() + 1);
-  renderCalendar();
-});
+    <!-- 업무 유형 선택 -->
+    <div class="mb-6">
+      <h2 class="text-xl font-semibold text-gray-800 mb-2">업무 유형 선택</h2>
+      <div class="flex flex-wrap gap-4">
+        <button class="task-type-btn px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600" data-task-type="guidance">안내 업무</button>
+        <button class="task-type-btn px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600" data-task-type="ticketing">매표 업무</button>
+      </div>
+    </div>
 
-renderCalendar();// 안내 / 매표
-document.getElementById("showInfoSectionBtn").addEventListener("click", () => {
-  document.getElementById("info-section").style.display = "block";
-  // 매표 섹션 있으면 숨기기
-});
+    <!-- 하행 안내 업무 -->
+    <div id="downbound-info-day-shift-tasks" class="shift-tasks-list mt-8" style="display: none;">
+      <h4 class="text-lg font-medium mb-2 text-gray-700">하행 주간 업무 목록</h4>
+      <div class="space-y-3">
+        <!-- 여기에 전주역 열차 도착 10분 전 업무 자동 삽입 -->
+        <!-- 예시 일부 -->
+        <div class="flex items-center p-2 bg-gray-50 rounded-md shadow-sm">
+          <span class="font-bold w-16 flex-shrink-0">09:49</span>
+          <span class="flex-grow break-words min-w-0">KTX 503 전주역 안내방송 준비 (매일)</span>
+          <input type="text" placeholder="메모" class="w-48 flex-shrink-0 mx-2 p-1 border border-gray-300 rounded-md text-sm">
+          <input type="checkbox" class="ml-2 h-5 w-5 text-green-600 rounded flex-shrink-0">
+        </div>
+        <div class="flex items-center p-2 bg-gray-50 rounded-md shadow-sm">
+          <span class="font-bold w-16 flex-shrink-0">10:17</span>
+          <span class="flex-grow break-words min-w-0">KTX 581 전주역 안내방송 준비 (매일)</span>
+          <input type="text" placeholder="메모" class="w-48 flex-shrink-0 mx-2 p-1 border border-gray-300 rounded-md text-sm">
+          <input type="checkbox" class="ml-2 h-5 w-5 text-green-600 rounded flex-shrink-0">
+        </div>
+        <!-- 추가 열차 업무 계속... -->
+      </div>
+    </div>
 
-document.getElementById("showTicketingSectionBtn").addEventListener("click", () => {
-  document.getElementById("info-section").style.display = "none";
-  // 매표 섹션 있으면 표시
-});
+    <div id="downbound-info-night-shift-tasks" class="shift-tasks-list mt-8" style="display: none;">
+      <h4 class="text-lg font-medium mb-2 text-gray-700">하행 야간 업무 목록</h4>
+      <div class="space-y-3">
+        <!-- 예시 일부 -->
+        <div class="flex items-center p-2 bg-gray-50 rounded-md shadow-sm">
+          <span class="font-bold w-16 flex-shrink-0">18:17</span>
+          <span class="flex-grow break-words min-w-0">KTX-산천 515 전주역 안내방송 준비 (매일)</span>
+          <input type="text" placeholder="메모" class="w-48 flex-shrink-0 mx-2 p-1 border border-gray-300 rounded-md text-sm">
+          <input type="checkbox" class="ml-2 h-5 w-5 text-green-600 rounded flex-shrink-0">
+        </div>
+        <!-- 추가 열차 업무 계속... -->
+      </div>
+    </div>
 
-// 주간 / 야간
-document.getElementById("showInfoDayShiftBtn").addEventListener("click", () => {
-  document.getElementById("info-day-shift-container").style.display = "block";
-  document.getElementById("info-night-shift-container").style.display = "none";
-});
-document.getElementById("showInfoNightShiftBtn").addEventListener("click", () => {
-  document.getElementById("info-day-shift-container").style.display = "none";
-  document.getElementById("info-night-shift-container").style.display = "block";
-});
+    <!-- 상행 업무 등도 필요한 경우 여기에 추가 가능 -->
 
-// 상행 / 하행 (주간 예시)
-document.getElementById("showInfoDayUpboundBtn").addEventListener("click", () => {
-  document.getElementById("upbound-info-day-shift-tasks").style.display = "block";
-  document.getElementById("downbound-info-day-shift-tasks").style.display = "none";
-});
-document.getElementById("showInfoDayDownboundBtn").addEventListener("click", () => {
-  document.getElementById("upbound-info-day-shift-tasks").style.display = "none";
-  document.getElementById("downbound-info-day-shift-tasks").style.display = "block";
-});
+    <!-- 하단 버튼 -->
+    <div class="flex justify-between mt-8">
+      <button id="backToCalendarBtn" class="px-6 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400 transition-colors duration-200">
+        캘린더로 돌아가기
+      </button>
+    </div>
+  </div>
+    <script>
+    // 페이지 전환
+    document.getElementById("goToCalendarBtn").addEventListener("click", function () {
+      document.getElementById("pattern-selection-page").style.display = "none";
+      document.getElementById("calendar-page").style.display = "block";
+
+      const selectedTeam = document.querySelector("input[name='selectPattern']:checked").value;
+      document.getElementById("selectedTeamDisplay").innerText = selectedTeam + "조";
+    });
+
+    document.getElementById("backToSelectionBtn").addEventListener("click", function () {
+      document.getElementById("calendar-page").style.display = "none";
+      document.getElementById("pattern-selection-page").style.display = "block";
+    });
+
+    document.getElementById("goToTasksPageBtn").addEventListener("click", function () {
+      document.getElementById("calendar-page").style.display = "none";
+      document.getElementById("task-page").style.display = "block";
+    });
+
+    document.getElementById("backToCalendarBtn").addEventListener("click", function () {
+      document.getElementById("task-page").style.display = "none";
+      document.getElementById("calendar-page").style.display = "block";
+    });
+
+    // 업무 유형에 따른 표시 전환
+    document.querySelectorAll(".task-type-btn").forEach(button => {
+      button.addEventListener("click", function () {
+        const taskType = this.dataset.taskType;
+
+        document.querySelectorAll(".shift-tasks-list").forEach(el => el.style.display = "none");
+
+        if (taskType === "guidance") {
+          document.getElementById("downbound-info-day-shift-tasks").style.display = "block";
+          document.getElementById("downbound-info-night-shift-tasks").style.display = "block";
+        } else if (taskType === "ticketing") {
+          // 향후 필요시 매표업무 섹션 표시
+        }
+      });
+    });
+
+    // 오늘 날짜 표시
+    const today = new Date();
+    const options = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
+    document.getElementById("today-date").textContent = today.toLocaleDateString('ko-KR', options);
+
+    // 월 이동 기능 (단순 날짜만 표시)
+    const currentMonthYear = document.getElementById("currentMonthYear");
+    let currentDate = new Date();
+
+    function updateMonthYear() {
+      const month = currentDate.toLocaleString('ko-KR', { month: 'long' });
+      const year = currentDate.getFullYear();
+      currentMonthYear.textContent = `${year}년 ${month}`;
+    }
+
+    updateMonthYear();
+
+    document.getElementById("prevMonthBtn").addEventListener("click", () => {
+      currentDate.setMonth(currentDate.getMonth() - 1);
+      updateMonthYear();
+    });
+
+    document.getElementById("nextMonthBtn").addEventListener("click", () => {
+      currentDate.setMonth(currentDate.getMonth() + 1);
+      updateMonthYear();
+    });
+  </script>
+</body>
+</html>
