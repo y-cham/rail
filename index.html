@@ -4,174 +4,185 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>근무 스케줄 및 업무 관리</title>
-  <!-- Tailwind CSS CDN을 로드합니다. -->
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    /* Inter 폰트를 사용합니다. */
     body {
       font-family: 'Inter', sans-serif;
     }
   </style>
 </head>
-  <body class="font-sans m-0 p-0 bg-gray-100 text-gray-800">
+<body class="bg-gray-100 text-gray-800">
 
-  <!-- 첫 번째 페이지: 조 선택 -->
-  <div id="pattern-selection-page" class="container max-w-md mx-auto my-20 p-8 bg-white rounded-lg shadow-lg flex flex-col items-center justify-center">
-    <h1 class="text-center text-3xl font-extrabold mb-8 text-gray-900">근무조 선택</h1>
+  <!-- 근무조 선택 -->
+  <div id="pattern-selection-page" class="max-w-md mx-auto my-20 p-8 bg-white rounded-lg shadow-lg">
+    <h1 class="text-3xl font-extrabold mb-8 text-center">근무조 선택</h1>
+    <div class="space-y-4 bg-blue-50 p-6 rounded-lg shadow-inner">
+      <label class="flex items-center space-x-3 text-xl"><input type="radio" name="selectPattern" value="A" checked> <span>A조</span></label>
+      <label class="flex items-center space-x-3 text-xl"><input type="radio" name="selectPattern" value="B"> <span>B조</span></label>
+      <label class="flex items-center space-x-3 text-xl"><input type="radio" name="selectPattern" value="C"> <span>C조</span></label>
+      <label class="flex items-center space-x-3 text-xl"><input type="radio" name="selectPattern" value="D"> <span>D조</span></label>
+    </div>
+    <button id="goToCalendarBtn" class="w-full mt-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 text-xl">캘린더 보기</button>
+  </div>
 
-    <div class="pattern-select flex flex-col gap-4 mb-8 p-6 bg-blue-50 rounded-lg shadow-inner w-full">
-      <label class="flex items-center space-x-3 text-xl text-gray-700">
-        <input type="radio" name="selectPattern" value="A" checked class="form-radio h-6 w-6 text-blue-600">
-        <span>A조</span>
-      </label>
-      <label class="flex items-center space-x-3 text-xl text-gray-700">
-        <input type="radio" name="selectPattern" value="B" class="form-radio h-6 w-6 text-blue-600">
-        <span>B조</span>
-      </label>
-      <label class="flex items-center space-x-3 text-xl text-gray-700">
-        <input type="radio" name="selectPattern" value="C" class="form-radio h-6 w-6 text-blue-600">
-        <span>C조</span>
-      </label>
-      <label class="flex items-center space-x-3 text-xl text-gray-700">
-        <input type="radio" name="selectPattern" value="D" class="form-radio h-6 w-6 text-blue-600">
-        <span>D조</span>
-      </label>
+  <!-- 캘린더 페이지 -->
+  <div id="calendar-page" class="max-w-4xl mx-auto my-10 p-6 bg-white rounded-lg shadow-lg" style="display: none;">
+    <h1 class="text-3xl font-extrabold text-center mb-6">철도 근무 스케줄 캘린더 (<span id="selectedTeamDisplay">A조</span>)</h1>
+    <div id="today-date" class="text-center text-lg font-semibold mb-4 text-blue-600">2025년 08월 08일 Friday</div>
+
+    <div class="flex justify-between items-center mb-4">
+      <button id="prevMonthBtn" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">이전 달</button>
+      <div id="currentMonthYear" class="text-xl font-bold"></div>
+      <button id="nextMonthBtn" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">다음 달</button>
     </div>
 
-    <button id="goToCalendarBtn" class="px-8 py-3 bg-green-500 text-white text-xl font-semibold rounded-lg shadow-md hover:bg-green-600 transition-colors duration-200">
-      캘린더 보기
-    </button>
-  </div>
-    <!-- 아래 코드를 삭제하세요 -->
-<!-- 로딩 메시지 -->
-<div id="loading-area" class="text-center mt-4 mb-2">
-  <div id="loading-message" class="text-gray-600">캘린더 로딩 중...</div>
-</div>
-  <!-- 세 번째 페이지: 업무 관리 -->
-  <div id="task-page" class="container max-w-4xl mx-auto my-5 p-5 bg-white rounded-lg shadow-lg" style="display: none;">
-    <h1 class="text-center text-3xl font-extrabold mb-6 text-gray-900">업무 관리</h1>
+    <div class="grid grid-cols-7 text-center font-bold border-b pb-2 text-gray-700">
+      <div>월</div><div>화</div><div>수</div><div>목</div><div>금</div><div>토</div><div>일</div>
+    </div>
+    <div id="calendar" class="grid grid-cols-7 gap-1 mt-2 min-h-[300px]"></div>
 
-    <!-- 업무 유형 선택 -->
+    <div class="flex justify-between mt-8">
+      <button id="backToSelectionBtn" class="px-6 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400">이전 페이지</button>
+      <button id="goToTasksPageBtn" class="px-6 py-2 bg-purple-500 text-white rounded-md hover:bg-purple-600">업무 관리</button>
+    </div>
+  </div>
+
+  <!-- 업무 페이지 -->
+  <div id="task-page" class="max-w-4xl mx-auto my-5 p-5 bg-white rounded-lg shadow-lg" style="display: none;">
+    <h1 class="text-3xl font-extrabold text-center mb-6">업무 관리</h1>
+
     <div class="mb-6">
-      <h2 class="text-xl font-semibold text-gray-800 mb-2">업무 유형 선택</h2>
-      <div class="flex flex-wrap gap-4">
-        <button class="task-type-btn px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600" data-task-type="guidance">안내 업무</button>
-        <button class="task-type-btn px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600" data-task-type="ticketing">매표 업무</button>
+      <h2 class="text-xl font-semibold mb-2">업무 유형 선택</h2>
+      <div class="flex gap-4">
+        <button class="task-type-btn px-4 py-2 bg-blue-500 text-white rounded" data-task-type="guidance">안내 업무</button>
+        <button class="task-type-btn px-4 py-2 bg-yellow-500 text-white rounded" data-task-type="ticketing">매표 업무</button>
       </div>
     </div>
 
-    <!-- 하행 안내 업무 -->
     <div id="downbound-info-day-shift-tasks" class="shift-tasks-list mt-8" style="display: none;">
-      <h4 class="text-lg font-medium mb-2 text-gray-700">하행 주간 업무 목록</h4>
+      <h4 class="text-lg font-medium mb-2">하행 주간 업무 목록</h4>
       <div class="space-y-3">
-        <!-- 여기에 전주역 열차 도착 10분 전 업무 자동 삽입 -->
-        <!-- 예시 일부 -->
-        <div class="flex items-center p-2 bg-gray-50 rounded-md shadow-sm">
-          <span class="font-bold w-16 flex-shrink-0">09:49</span>
-          <span class="flex-grow break-words min-w-0">KTX 503 전주역 안내방송 준비 (매일)</span>
-          <input type="text" placeholder="메모" class="w-48 flex-shrink-0 mx-2 p-1 border border-gray-300 rounded-md text-sm">
-          <input type="checkbox" class="ml-2 h-5 w-5 text-green-600 rounded flex-shrink-0">
+        <div class="flex items-center p-2 bg-gray-50 rounded">
+          <span class="font-bold w-16">09:49</span>
+          <span class="flex-grow">KTX 503 전주역 안내방송 준비 (매일)</span>
+          <input type="text" placeholder="메모" class="mx-2 p-1 border rounded w-48">
+          <input type="checkbox" class="h-5 w-5">
         </div>
-        <div class="flex items-center p-2 bg-gray-50 rounded-md shadow-sm">
-          <span class="font-bold w-16 flex-shrink-0">10:17</span>
-          <span class="flex-grow break-words min-w-0">KTX 581 전주역 안내방송 준비 (매일)</span>
-          <input type="text" placeholder="메모" class="w-48 flex-shrink-0 mx-2 p-1 border border-gray-300 rounded-md text-sm">
-          <input type="checkbox" class="ml-2 h-5 w-5 text-green-600 rounded flex-shrink-0">
-        </div>
-        <!-- 추가 열차 업무 계속... -->
+        <!-- 필요시 추가 -->
       </div>
     </div>
 
     <div id="downbound-info-night-shift-tasks" class="shift-tasks-list mt-8" style="display: none;">
-      <h4 class="text-lg font-medium mb-2 text-gray-700">하행 야간 업무 목록</h4>
+      <h4 class="text-lg font-medium mb-2">하행 야간 업무 목록</h4>
       <div class="space-y-3">
-        <!-- 예시 일부 -->
-        <div class="flex items-center p-2 bg-gray-50 rounded-md shadow-sm">
-          <span class="font-bold w-16 flex-shrink-0">18:17</span>
-          <span class="flex-grow break-words min-w-0">KTX-산천 515 전주역 안내방송 준비 (매일)</span>
-          <input type="text" placeholder="메모" class="w-48 flex-shrink-0 mx-2 p-1 border border-gray-300 rounded-md text-sm">
-          <input type="checkbox" class="ml-2 h-5 w-5 text-green-600 rounded flex-shrink-0">
+        <div class="flex items-center p-2 bg-gray-50 rounded">
+          <span class="font-bold w-16">18:17</span>
+          <span class="flex-grow">KTX 515 전주역 안내방송 준비 (매일)</span>
+          <input type="text" placeholder="메모" class="mx-2 p-1 border rounded w-48">
+          <input type="checkbox" class="h-5 w-5">
         </div>
-        <!-- 추가 열차 업무 계속... -->
       </div>
     </div>
 
-    <!-- 상행 업무 등도 필요한 경우 여기에 추가 가능 -->
-
-    <!-- 하단 버튼 -->
     <div class="flex justify-between mt-8">
-      <button id="backToCalendarBtn" class="px-6 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400 transition-colors duration-200">
-        캘린더로 돌아가기
-      </button>
+      <button id="backToCalendarBtn" class="px-6 py-2 bg-gray-300 rounded hover:bg-gray-400">캘린더로 돌아가기</button>
     </div>
   </div>
-    <script>
-    // 페이지 전환
-    document.getElementById("goToCalendarBtn").addEventListener("click", function () {
-      document.getElementById("pattern-selection-page").style.display = "none";
-      document.getElementById("calendar-page").style.display = "block";
 
-      const selectedTeam = document.querySelector("input[name='selectPattern']:checked").value;
-      document.getElementById("selectedTeamDisplay").innerText = selectedTeam + "조";
-    });
+  <!-- 전체 스크립트 -->
+  <script>
+    const shiftPatterns = {
+      A: ['주간', '야간', '비번', '휴무'],
+      B: ['야간', '비번', '휴무', '주간'],
+      C: ['비번', '휴무', '주간', '야간'],
+      D: ['휴무', '주간', '야간', '비번'],
+    };
 
-    document.getElementById("backToSelectionBtn").addEventListener("click", function () {
-      document.getElementById("calendar-page").style.display = "none";
-      document.getElementById("pattern-selection-page").style.display = "block";
-    });
-
-    document.getElementById("goToTasksPageBtn").addEventListener("click", function () {
-      document.getElementById("calendar-page").style.display = "none";
-      document.getElementById("task-page").style.display = "block";
-    });
-
-    document.getElementById("backToCalendarBtn").addEventListener("click", function () {
-      document.getElementById("task-page").style.display = "none";
-      document.getElementById("calendar-page").style.display = "block";
-    });
-
-    // 업무 유형에 따른 표시 전환
-    document.querySelectorAll(".task-type-btn").forEach(button => {
-      button.addEventListener("click", function () {
-        const taskType = this.dataset.taskType;
-
-        document.querySelectorAll(".shift-tasks-list").forEach(el => el.style.display = "none");
-
-        if (taskType === "guidance") {
-          document.getElementById("downbound-info-day-shift-tasks").style.display = "block";
-          document.getElementById("downbound-info-night-shift-tasks").style.display = "block";
-        } else if (taskType === "ticketing") {
-          // 향후 필요시 매표업무 섹션 표시
-        }
-      });
-    });
-
-    // 오늘 날짜 표시
-    const today = new Date();
-    const options = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
-    document.getElementById("today-date").textContent = today.toLocaleDateString('ko-KR', options);
-
-    // 월 이동 기능 (단순 날짜만 표시)
-    const currentMonthYear = document.getElementById("currentMonthYear");
+    const baseDate = new Date(2025, 0, 1);
     let currentDate = new Date();
 
     function updateMonthYear() {
       const month = currentDate.toLocaleString('ko-KR', { month: 'long' });
       const year = currentDate.getFullYear();
-      currentMonthYear.textContent = `${year}년 ${month}`;
+      document.getElementById("currentMonthYear").textContent = `${year}년 ${month}`;
     }
 
-    updateMonthYear();
+    function renderCalendar(teamCode) {
+      const calendar = document.getElementById("calendar");
+      calendar.innerHTML = "";
+
+      const year = currentDate.getFullYear();
+      const month = currentDate.getMonth();
+      const firstDay = new Date(year, month, 1).getDay();
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      const pattern = shiftPatterns[teamCode];
+      const offset = (firstDay === 0) ? 6 : firstDay - 1;
+
+      for (let i = 0; i < offset; i++) {
+        const blank = document.createElement("div");
+        calendar.appendChild(blank);
+      }
+
+      for (let day = 1; day <= daysInMonth; day++) {
+        const cell = document.createElement("div");
+        cell.className = "text-center p-2 border rounded bg-gray-50";
+        const date = new Date(year, month, day);
+        const diffDays = Math.floor((date - baseDate) / (1000 * 60 * 60 * 24));
+        const index = ((diffDays % 4) + 4) % 4;
+        const shift = pattern[index];
+        cell.innerHTML = `<div class="font-bold">${day}</div><div class="text-blue-600 text-sm">${shift}</div>`;
+        calendar.appendChild(cell);
+      }
+    }
+
+    document.getElementById("goToCalendarBtn").addEventListener("click", () => {
+      document.getElementById("pattern-selection-page").style.display = "none";
+      document.getElementById("calendar-page").style.display = "block";
+      const selectedTeam = document.querySelector("input[name='selectPattern']:checked").value;
+      document.getElementById("selectedTeamDisplay").innerText = selectedTeam + "조";
+      updateMonthYear();
+      renderCalendar(selectedTeam);
+    });
+
+    document.getElementById("backToSelectionBtn").addEventListener("click", () => {
+      document.getElementById("calendar-page").style.display = "none";
+      document.getElementById("pattern-selection-page").style.display = "block";
+    });
+
+    document.getElementById("goToTasksPageBtn").addEventListener("click", () => {
+      document.getElementById("calendar-page").style.display = "none";
+      document.getElementById("task-page").style.display = "block";
+    });
+
+    document.getElementById("backToCalendarBtn").addEventListener("click", () => {
+      document.getElementById("task-page").style.display = "none";
+      document.getElementById("calendar-page").style.display = "block";
+    });
+
+    document.querySelectorAll(".task-type-btn").forEach(button => {
+      button.addEventListener("click", function () {
+        document.querySelectorAll(".shift-tasks-list").forEach(el => el.style.display = "none");
+        if (this.dataset.taskType === "guidance") {
+          document.getElementById("downbound-info-day-shift-tasks").style.display = "block";
+          document.getElementById("downbound-info-night-shift-tasks").style.display = "block";
+        }
+      });
+    });
 
     document.getElementById("prevMonthBtn").addEventListener("click", () => {
       currentDate.setMonth(currentDate.getMonth() - 1);
       updateMonthYear();
+      const selectedTeam = document.querySelector("input[name='selectPattern']:checked").value;
+      renderCalendar(selectedTeam);
     });
 
     document.getElementById("nextMonthBtn").addEventListener("click", () => {
       currentDate.setMonth(currentDate.getMonth() + 1);
       updateMonthYear();
+      const selectedTeam = document.querySelector("input[name='selectPattern']:checked").value;
+      renderCalendar(selectedTeam);
     });
   </script>
+
 </body>
 </html>
