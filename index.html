@@ -1,896 +1,330 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>근무 스케줄 및 업무 관리</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    /* Inter 폰트를 사용합니다. */
-    body {
-      font-family: 'Inter', sans-serif;
-    }
-    /* 근무 형태에 따른 색상 클래스 정의 */
-    .shift-day {
-      background-color: #d1fae5; /* 연두색 */
-    }
-    .shift-night {
-      background-color: #e0f2fe; /* 하늘색 */
-    }
-    .shift-off {
-      background-color: #e5e7eb; /* 회색 */
-    }
-  </style>
+<meta charset="UTF-8">
+<title>2025년 8월 근무표</title>
+<style>
+  body { font-family: Arial, sans-serif; }
+  .calendar {
+    width: 100%;
+    max-width: 900px;
+    margin: 20px auto;
+    border-collapse: collapse;
+    font-size: 14px;
+    border: 1px solid #ccc;
+  }
+  .calendar th, .calendar td {
+    border: 1px solid #ccc;
+    padding: 5px;
+    text-align: center;
+    vertical-align: top;
+    height: 100px;
+  }
+  .calendar th {
+    background-color: #f2f2f2;
+  }
+  .day-header {
+    text-align: left;
+    font-weight: bold;
+    padding: 5px;
+  }
+  .duty-cell {
+    padding: 3px;
+    border-radius: 3px;
+    margin-bottom: 2px;
+    font-weight: bold;
+  }
+  .day { background-color: #e6f7ff; } /* 주간 */
+  .night { background-color: #ffe6f7; } /* 야간 */
+  .off-duty { background-color: #f7ffe6; } /* 비번 */
+  .holiday { background-color: #cccccc; } /* 휴무 */
+  .highlight-A { border: 2px solid green; }
+  .highlight-B { border: 2px solid blue; }
+  .highlight-C { border: 2px solid orange; }
+  .highlight-D { border: 2px solid red; }
+</style>
 </head>
-<body class="font-sans m-0 p-0 bg-gray-100 text-gray-800">
+<body>
 
-    <div id="pattern-selection-page" class="container max-w-md mx-auto my-20 p-8 bg-white rounded-lg shadow-lg flex flex-col items-center justify-center">
-    <h1 class="text-center text-3xl font-extrabold mb-8 text-gray-900">근무조 선택</h1>
+<h1>2025년 8월 교대 근무 일정표 (4조 2교대)</h1>
 
-    <div class="pattern-select flex flex-col gap-4 mb-8 p-6 bg-blue-50 rounded-lg shadow-inner w-full">
-      <label class="flex items-center space-x-3 text-xl text-gray-700">
-        <input type="radio" name="selectPattern" value="A" checked class="form-radio h-6 w-6 text-blue-600">
-        <span>A조</span>
-      </label>
-      <label class="flex items-center space-x-3 text-xl text-gray-700">
-        <input type="radio" name="selectPattern" value="B" class="form-radio h-6 w-6 text-blue-600">
-        <span>B조</span>
-      </label>
-      <label class="flex items-center space-x-3 text-xl text-gray-700">
-        <input type="radio" name="selectPattern" value="C" class="form-radio h-6 w-6 text-blue-600">
-        <span>C조</span>
-      </label>
-      <label class="flex items-center space-x-3 text-xl text-gray-700">
-        <input type="radio" name="selectPattern" value="D" class="form-radio h-6 w-6 text-blue-600">
-        <span>D조</span>
-      </label>
-    </div>
-
-    <button id="goToCalendarBtn" class="px-8 py-3 bg-green-500 text-white text-xl font-semibold rounded-lg shadow-md hover:bg-green-600 transition-colors duration-200">
-      캘린더 보기
-    </button>
-  </div>
-
-    <div id="calendar-page" class="container max-w-4xl mx-auto my-5 p-5 bg-white rounded-lg shadow-lg" style="display: none;">
-    <h1 class="text-center text-3xl font-extrabold mb-6 text-gray-900">철도 근무 스케줄 캘린더 (<span id="selectedTeamDisplay">A조</span>)</h1>
-
-        <div id="loading-area" class="text-center mt-4 mb-2">
-      <div id="loading-message" class="text-gray-600">캘린더 로딩 중...</div>
-    </div>
-
-        <div class="flex justify-between items-center mb-4">
-      <button id="prevMonthBtn" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors duration-200">이전 달</button>
-      <div id="currentMonthYear" class="text-center text-xl font-bold text-gray-800"></div>
-      <button id="nextMonthBtn" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors duration-200">다음 달</button>
-    </div>
-
-        <div id="today-date" class="text-center text-lg font-semibold mb-4 text-blue-600"></div>
-
-        <div class="day-labels grid grid-cols-7 font-bold text-center mt-5 text-gray-700 text-base py-2 border-b border-gray-300">
-      <div>월</div><div>화</div><div>수</div><div>목</div><div>금</div><div>토</div><div>일</div>
-    </div>
-        <div id="calendar" class="grid grid-cols-7 gap-1 mt-2"></div>
-
-        <div class="flex justify-between mt-8">
-      <button id="backToSelectionBtn" class="px-6 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400 transition-colors duration-200">
-        이전 페이지
-      </button>
-      <button id="goToTasksPageBtn" class="px-6 py-2 bg-purple-500 text-white rounded-md hover:bg-purple-600 transition-colors duration-200">
-        업무 관리
-      </button>
-    </div>
-  </div>
-
-    <div id="task-page" class="container max-w-4xl mx-auto my-5 p-5 bg-white rounded-lg shadow-lg" style="display: none;">
-    <h1 class="text-center text-3xl font-extrabold mb-6 text-gray-900"><span id="taskPageTitle">안내 업무</span> 관리</h1>
-
-        <div class="flex justify-center gap-4 mb-6">
-      <button id="showInfoSectionBtn" class="px-6 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors duration-200">안내</button>
-      <button id="showTicketingSectionBtn" class="px-6 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors duration-200">매표</button>
-    </div>
-
-        <div id="info-section" class="task-section">
-      <h2 class="text-2xl font-bold mb-4 text-gray-800">안내 업무</h2>
-            <div class="flex justify-center gap-4 mb-4">
-        <button id="showInfoDayShiftBtn" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition-colors duration-200">주간</button>
-        <button id="showInfoNightShiftBtn" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition-colors duration-200">야간</button>
-      </div>
-
-            <div id="info-day-shift-container" class="shift-direction-container" style="display: none;">
-        <h3 class="text-xl font-semibold mb-3 text-blue-700">주간 방향 선택</h3>
-        <div class="flex justify-center gap-4 mb-4">
-          <button id="showInfoDayUpboundBtn" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition-colors duration-200">상행</button>
-          <button id="showInfoDayDownboundBtn" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition-colors duration-200">하행</button>
-        </div>
-
-        <div id="upbound-info-day-shift-tasks" class="shift-tasks-list" style="display: none;">
-          <h4 class="text-lg font-medium mb-2 text-gray-700">상행 주간 업무 목록</h4>
-          <div class="space-y-3">
-                        <div class="flex items-center p-2 bg-gray-50 rounded-md shadow-sm">
-              <span class="font-bold w-16 flex-shrink-0">09:10</span>
-              <span class="flex-grow break-words min-w-0">화장실점검</span>
-              <input type="text" placeholder="메모" class="w-48 flex-shrink-0 mx-2 p-1 border border-gray-300 rounded-md text-sm">
-              <input type="checkbox" class="ml-2 h-5 w-5 text-green-600 rounded flex-shrink-0">
-            </div>
-            <div class="flex items-center p-2 bg-gray-50 rounded-md shadow-sm">
-              <span class="font-bold w-16 flex-shrink-0">09:10</span>
-              <span class="flex-grow break-words min-w-0">리프트 점검</span>
-              <input type="text" placeholder="메모" class="w-48 flex-shrink-0 mx-2 p-1 border border-gray-300 rounded-md text-sm">
-              <input type="checkbox" class="ml-2 h-5 w-5 text-green-600 rounded flex-shrink-0">
-            </div>
-            <div class="flex items-center p-2 bg-gray-50 rounded-md shadow-sm">
-              <span class="font-bold w-16 flex-shrink-0">09:10</span>
-              <span class="flex-grow break-words min-w-0">유실물 갯수 확인</span>
-              <input type="text" placeholder="메모" class="w-48 flex-shrink-0 mx-2 p-1 border border-gray-300 rounded-md text-sm">
-              <input type="checkbox" class="ml-2 h-5 w-5 text-green-600 rounded flex-shrink-0">
-            </div>
-            <div class="flex items-center p-2 bg-gray-50 rounded-md shadow-sm">
-              <span class="font-bold w-16 flex-shrink-0">10:00</span>
-              <span class="flex-grow break-words min-w-0">수유방 점검</span>
-              <input type="text" placeholder="메모" class="w-48 flex-shrink-0 mx-2 p-1 border border-gray-300 rounded-md text-sm">
-              <input type="checkbox" class="ml-2 h-5 w-5 text-green-600 rounded flex-shrink-0">
-            </div>
-            <div class="flex items-center p-2 bg-gray-50 rounded-md shadow-sm">
-              <span class="font-bold w-16 flex-shrink-0">11:00</span>
-              <span class="flex-grow break-words min-w-0">화장실점검</span>
-              <input type="text" placeholder="메모" class="w-48 flex-shrink-0 mx-2 p-1 border border-gray-300 rounded-md text-sm">
-              <input type="checkbox" class="ml-2 h-5 w-5 text-green-600 rounded flex-shrink-0">
-            </div>
-            <div class="flex items-center p-2 bg-gray-50 rounded-md shadow-sm">
-              <span class="font-bold w-16 flex-shrink-0">13:00</span>
-              <span class="flex-grow break-words min-w-0">화장실점검</span>
-              <input type="text" placeholder="메모" class="w-48 flex-shrink-0 mx-2 p-1 border border-gray-300 rounded-md text-sm">
-              <input type="checkbox" class="ml-2 h-5 w-5 text-green-600 rounded flex-shrink-0">
-            </div>
-            <div class="flex items-center p-2 bg-gray-50 rounded-md shadow-sm">
-              <span class="font-bold w-16 flex-shrink-0">14:00</span>
-              <span class="flex-grow break-words min-w-0">수유방점검</span>
-              <input type="text" placeholder="메모" class="w-48 flex-shrink-0 mx-2 p-1 border border-gray-300 rounded-md text-sm">
-              <input type="checkbox" class="ml-2 h-5 w-5 text-green-600 rounded flex-shrink-0">
-            </div>
-            <div class="flex items-center p-2 bg-gray-50 rounded-md shadow-sm">
-              <span class="font-bold w-16 flex-shrink-0">15:00</span>
-              <span class="flex-grow break-words min-w-0">화장실점검</span>
-              <input type="text" placeholder="메모" class="w-48 flex-shrink-0 mx-2 p-1 border border-gray-300 rounded-md text-sm">
-              <input type="checkbox" class="ml-2 h-5 w-5 text-green-600 rounded flex-shrink-0">
-            </div>
-            <div class="flex items-center p-2 bg-gray-50 rounded-md shadow-sm">
-              <span class="font-bold w-16 flex-shrink-0">17:00</span>
-              <span class="flex-grow break-words min-w-0">화장실점검</span>
-              <input type="text" placeholder="메모" class="w-48 flex-shrink-0 mx-2 p-1 border border-gray-300 rounded-md text-sm">
-              <input type="checkbox" class="ml-2 h-5 w-5 text-green-600 rounded flex-shrink-0">
-            </div>
-            <div class="flex items-center p-2 bg-gray-50 rounded-md shadow-sm">
-              <span class="font-bold w-16 flex-shrink-0">17:00</span>
-              <span class="flex-grow break-words min-w-0">유실물 갯수 확인</span>
-              <input type="text" placeholder="메모" class="w-48 flex-shrink-0 mx-2 p-1 border border-gray-300 rounded-md text-sm">
-              <input type="checkbox" class="ml-2 h-5 w-5 text-green-600 rounded flex-shrink-0">
-            </div>
-            <div class="flex items-center p-2 bg-gray-50 rounded-md shadow-sm">
-              <span class="font-bold w-16 flex-shrink-0">09:14</span>
-              <span class="flex-grow break-words min-w-0">KTX-산천 506 용산 행</span>
-              <input type="text" placeholder="메모" class="w-48 flex-shrink-0 mx-2 p-1 border border-gray-300 rounded-md text-sm">
-              <input type="checkbox" class="ml-2 h-5 w-5 text-green-600 rounded flex-shrink-0">
-            </div>
-            <div class="flex items-center p-2 bg-gray-50 rounded-md shadow-sm">
-              <span class="font-bold w-16 flex-shrink-0">10:38</span>
-              <span class="flex-grow break-words min-w-0">KTX-산천 508 용산 행</span>
-              <input type="text" placeholder="메모" class="w-48 flex-shrink-0 mx-2 p-1 border border-gray-300 rounded-md text-sm">
-              <input type="checkbox" class="ml-2 h-5 w-5 text-green-600 rounded flex-shrink-0">
-            </div>
-            <div class="flex items-center p-2 bg-gray-50 rounded-md shadow-sm">
-              <span class="font-bold w-16 flex-shrink-0">11:11</span>
-              <span class="flex-grow break-words min-w-0">SRT 682 수서 행</span>
-              <input type="text" placeholder="메모" class="w-48 flex-shrink-0 mx-2 p-1 border border-gray-300 rounded-md text-sm">
-              <input type="checkbox" class="ml-2 h-5 w-5 text-green-600 rounded flex-shrink-0">
-            </div>
-            <div class="flex items-center p-2 bg-gray-50 rounded-md shadow-sm">
-              <span class="font-bold w-16 flex-shrink-0">12:34</span>
-              <span class="flex-grow break-words min-w-0">KTX 510 용산 행</span>
-              <input type="text" placeholder="메모" class="w-48 flex-shrink-0 mx-2 p-1 border border-gray-300 rounded-md text-sm">
-              <input type="checkbox" class="ml-2 h-5 w-5 text-green-600 rounded flex-shrink-0">
-            </div>
-            <div class="flex items-center p-2 bg-gray-50 rounded-md shadow-sm">
-              <span class="font-bold w-16 flex-shrink-0">13:36</span>
-              <span class="flex-grow break-words min-w-0">KTX 512 용산 행</span>
-              <input type="text" placeholder="메모" class="w-48 flex-shrink-0 mx-2 p-1 border border-gray-300 rounded-md text-sm">
-              <input type="checkbox" class="ml-2 h-5 w-5 text-green-600 rounded flex-shrink-0">
-            </div>
-            <div class="flex items-center p-2 bg-gray-50 rounded-md shadow-sm">
-              <span class="font-bold w-16 flex-shrink-0">14:05</span>
-              <span class="flex-grow break-words min-w-0">KTX 586 용산 행</span>
-              <input type="text" placeholder="메모" class="w-48 flex-shrink-0 mx-2 p-1 border border-gray-300 rounded-md text-sm">
-              <input type="checkbox" class="ml-2 h-5 w-5 text-green-600 rounded flex-shrink-0">
-            </div>
-            <div class="flex items-center p-2 bg-gray-50 rounded-md shadow-sm">
-              <span class="font-bold w-16 flex-shrink-0">14:42</span>
-              <span class="flex-grow break-words min-w-0">KTX-산천 514 용산 행</span>
-              <input type="text" placeholder="메모" class="w-48 flex-shrink-0 mx-2 p-1 border border-gray-300 rounded-md text-sm">
-              <input type="checkbox" class="ml-2 h-5 w-5 text-green-600 rounded flex-shrink-0">
-            </div>
-            <div class="flex items-center p-2 bg-gray-50 rounded-md shadow-sm">
-              <span class="font-bold w-16 flex-shrink-0">15:49</span>
-              <span class="flex-grow break-words min-w-0">KTX 516 용산 행</span>
-              <input type="text" placeholder="메모" class="w-48 flex-shrink-0 mx-2 p-1 border border-gray-300 rounded-md text-sm">
-              <input type="checkbox" class="ml-2 h-5 w-5 text-green-600 rounded flex-shrink-0">
-            </div>
-            <div class="flex items-center p-2 bg-gray-50 rounded-md shadow-sm">
-              <span class="font-bold w-16 flex-shrink-0">16:37</span>
-              <span class="flex-grow break-words min-w-0">KTX 518 용산 행</span>
-              <input type="text" placeholder="메모" class="w-48 flex-shrink-0 mx-2 p-1 border border-gray-300 rounded-md text-sm">
-              <input type="checkbox" class="ml-2 h-5 w-5 text-green-600 rounded flex-shrink-0">
-            </div>
-            <div class="flex items-center p-2 bg-gray-50 rounded-md shadow-sm">
-              <span class="font-bold w-16 flex-shrink-0">17:18</span>
-              <span class="flex-grow break-words min-w-0">KTX 588 용산 행</span>
-              <input type="text" placeholder="메모" class="w-48 flex-shrink-0 mx-2 p-1 border border-gray-300 rounded-md text-sm">
-              <input type="checkbox" class="ml-2 h-5 w-5 text-green-600 rounded flex-shrink-0">
-            </div>
-          </div>
-        </div>
-
-        <div id="downbound-info-day-shift-tasks" class="shift-tasks-list" style="display: none;">
-          <h4 class="text-lg font-medium mb-2 text-gray-700">하행 주간 업무 목록</h4>
-          <div class="space-y-3">
-                        <div class="flex items-center p-2 bg-gray-50 rounded-md shadow-sm">
-              <span class="font-bold w-16 flex-shrink-0">09:10</span>
-              <span class="flex-grow break-words min-w-0">화장실점검</span>
-              <input type="text" placeholder="메모" class="w-48 flex-shrink-0 mx-2 p-1 border border-gray-300 rounded-md text-sm">
-              <input type="checkbox" class="ml-2 h-5 w-5 text-green-600 rounded flex-shrink-0">
-            </div>
-            <div class="flex items-center p-2 bg-gray-50 rounded-md shadow-sm">
-              <span class="font-bold w-16 flex-shrink-0">09:10</span>
-              <span class="flex-grow break-words min-w-0">리프트 점검</span>
-              <input type="text" placeholder="메모" class="w-48 flex-shrink-0 mx-2 p-1 border border-gray-300 rounded-md text-sm">
-              <input type="checkbox" class="ml-2 h-5 w-5 text-green-600 rounded flex-shrink-0">
-            </div>
-            <div class="flex items-center p-2 bg-gray-50 rounded-md shadow-sm">
-              <span class="font-bold w-16 flex-shrink-0">09:10</span>
-              <span class="flex-grow break-words min-w-0">유실물 갯수 확인</span>
-              <input type="text" placeholder="메모" class="w-48 flex-shrink-0 mx-2 p-1 border border-gray-300 rounded-md text-sm">
-              <input type="checkbox" class="ml-2 h-5 w-5 text-green-600 rounded flex-shrink-0">
-            </div>
-            <div class="flex items-center p-2 bg-gray-50 rounded-md shadow-sm">
-              <span class="font-bold w-16 flex-shrink-0">09:59</span>
-              <span class="flex-grow break-words min-w-0">KTX 581 여수EXPO 행</span>
-              <input type="text" placeholder="메모" class="w-48 flex-shrink-0 mx-2 p-1 border border-gray-300 rounded-md text-sm">
-              <input type="checkbox" class="ml-2 h-5 w-5 text-green-600 rounded flex-shrink-0">
-            </div>
-            <div class="flex items-center p-2 bg-gray-50 rounded-md shadow-sm">
-              <span class="font-bold w-16 flex-shrink-0">10:00</span>
-              <span class="flex-grow break-words min-w-0">수유방 점검</span>
-              <input type="text" placeholder="메모" class="w-48 flex-shrink-0 mx-2 p-1 border border-gray-300 rounded-md text-sm">
-              <input type="checkbox" class="ml-2 h-5 w-5 text-green-600 rounded flex-shrink-0">
-            </div>
-            <div class="flex items-center p-2 bg-gray-50 rounded-md shadow-sm">
-              <span class="font-bold w-16 flex-shrink-0">10:20</span>
-              <span class="flex-grow break-words min-w-0">KTX-산천 505 여수EXPO 행</span>
-              <input type="text" placeholder="메모" class="w-48 flex-shrink-0 mx-2 p-1 border border-gray-300 rounded-md text-sm">
-              <input type="checkbox" class="ml-2 h-5 w-5 text-green-600 rounded flex-shrink-0">
-            </div>
-            <div class="flex items-center p-2 bg-gray-50 rounded-md shadow-sm">
-              <span class="font-bold w-16 flex-shrink-0">11:00</span>
-              <span class="flex-grow break-words min-w-0">화장실점검</span>
-              <input type="text" placeholder="메모" class="w-48 flex-shrink-0 mx-2 p-1 border border-gray-300 rounded-md text-sm">
-              <input type="checkbox" class="ml-2 h-5 w-5 text-green-600 rounded flex-shrink-0">
-            </div>
-            <div class="flex items-center p-2 bg-gray-50 rounded-md shadow-sm">
-              <span class="font-bold w-16 flex-shrink-0">11:39</span>
-              <span class="flex-grow break-words min-w-0">KTX-산천 507 여수EXPO 행</span>
-              <input type="text" placeholder="메모" class="w-48 flex-shrink-0 mx-2 p-1 border border-gray-300 rounded-md text-sm">
-              <input type="checkbox" class="ml-2 h-5 w-5 text-green-600 rounded flex-shrink-0">
-            </div>
-            <div class="flex items-center p-2 bg-gray-50 rounded-md shadow-sm">
-              <span class="font-bold w-16 flex-shrink-0">12:09</span>
-              <span class="flex-grow break-words min-w-0">SRT 681 여수EXPO 행</span>
-              <input type="text" placeholder="메모" class="w-48 flex-shrink-0 mx-2 p-1 border border-gray-300 rounded-md text-sm">
-              <input type="checkbox" class="ml-2 h-5 w-5 text-green-600 rounded flex-shrink-0">
-            </div>
-            <div class="flex items-center p-2 bg-gray-50 rounded-md shadow-sm">
-              <span class="font-bold w-16 flex-shrink-0">12:25</span>
-              <span class="flex-grow break-words min-w-0">KTX 585 여수EXPO 행</span>
-              <input type="text" placeholder="메모" class="w-48 flex-shrink-0 mx-2 p-1 border border-gray-300 rounded-md text-sm">
-              <input type="checkbox" class="ml-2 h-5 w-5 text-green-600 rounded flex-shrink-0">
-            </div>
-            <div class="flex items-center p-2 bg-gray-50 rounded-md shadow-sm">
-              <span class="font-bold w-16 flex-shrink-0">12:39</span>
-              <span class="flex-grow break-words min-w-0">KTX 509 여수EXPO 행</span>
-              <input type="text" placeholder="메모" class="w-48 flex-shrink-0 mx-2 p-1 border border-gray-300 rounded-md text-sm">
-              <input type="checkbox" class="ml-2 h-5 w-5 text-green-600 rounded flex-shrink-0">
-            </div>
-            <div class="flex items-center p-2 bg-gray-50 rounded-md shadow-sm">
-              <span class="font-bold w-16 flex-shrink-0">13:00</span>
-              <span class="flex-grow break-words min-w-0">화장실점검</span>
-              <input type="text" placeholder="메모" class="w-48 flex-shrink-0 mx-2 p-1 border border-gray-300 rounded-md text-sm">
-              <input type="checkbox" class="ml-2 h-5 w-5 text-green-600 rounded flex-shrink-0">
-            </div>
-            <div class="flex items-center p-2 bg-gray-50 rounded-md shadow-sm">
-              <span class="font-bold w-16 flex-shrink-0">13:30</span>
-              <span class="flex-grow break-words min-w-0">KTX 511 여수EXPO 행</span>
-              <input type="text" placeholder="메모" class="w-48 flex-shrink-0 mx-2 p-1 border border-gray-300 rounded-md text-sm">
-              <input type="checkbox" class="ml-2 h-5 w-5 text-green-600 rounded flex-shrink-0">
-            </div>
-            <div class="flex items-center p-2 bg-gray-50 rounded-md shadow-sm">
-              <span class="font-bold w-16 flex-shrink-0">14:00</span>
-              <span class="flex-grow break-words min-w-0">수유방점검</span>
-              <input type="text" placeholder="메모" class="w-48 flex-shrink-0 mx-2 p-1 border border-gray-300 rounded-md text-sm">
-              <input type="checkbox" class="ml-2 h-5 w-5 text-green-600 rounded flex-shrink-0">
-            </div>
-            <div class="flex items-center p-2 bg-gray-50 rounded-md shadow-sm">
-              <span class="font-bold w-16 flex-shrink-0">14:38</span>
-              <span class="flex-grow break-words min-w-0">KTX-산천 513 여수EXPO 행</span>
-              <input type="text" placeholder="메모" class="w-48 flex-shrink-0 mx-2 p-1 border border-gray-300 rounded-md text-sm">
-              <input type="checkbox" class="ml-2 h-5 w-5 text-green-600 rounded flex-shrink-0">
-            </div>
-            <div class="flex items-center p-2 bg-gray-50 rounded-md shadow-sm">
-              <span class="font-bold w-16 flex-shrink-0">15:00</span>
-              <span class="flex-grow break-words min-w-0">화장실점검</span>
-              <input type="text" placeholder="메모" class="w-48 flex-shrink-0 mx-2 p-1 border border-gray-300 rounded-md text-sm">
-              <input type="checkbox" class="ml-2 h-5 w-5 text-green-600 rounded flex-shrink-0">
-            </div>
-            <div class="flex items-center p-2 bg-gray-50 rounded-md shadow-sm">
-              <span class="font-bold w-16 flex-shrink-0">15:35</span>
-              <span class="flex-grow break-words min-w-0">KTX 515 여수EXPO 행</span>
-              <input type="text" placeholder="메모" class="w-48 flex-shrink-0 mx-2 p-1 border border-gray-300 rounded-md text-sm">
-              <input type="checkbox" class="ml-2 h-5 w-5 text-green-600 rounded flex-shrink-0">
-            </div>
-            <div class="flex items-center p-2 bg-gray-50 rounded-md shadow-sm">
-              <span class="font-bold w-16 flex-shrink-0">16:30</span>
-              <span class="flex-grow break-words min-w-0">KTX 517 여수EXPO 행</span>
-              <input type="text" placeholder="메모" class="w-48 flex-shrink-0 mx-2 p-1 border border-gray-300 rounded-md text-sm">
-              <input type="checkbox" class="ml-2 h-5 w-5 text-green-600 rounded flex-shrink-0">
-            </div>
-            <div class="flex items-center p-2 bg-gray-50 rounded-md shadow-sm">
-              <span class="font-bold w-16 flex-shrink-0">16:54</span>
-              <span class="flex-grow break-words min-w-0">KTX 587 여수EXPO 행</span>
-              <input type="text" placeholder="메모" class="w-48 flex-shrink-0 mx-2 p-1 border border-gray-300 rounded-md text-sm">
-              <input type="checkbox" class="ml-2 h-5 w-5 text-green-600 rounded flex-shrink-0">
-            </div>
-            <div class="flex items-center p-2 bg-gray-50 rounded-md shadow-sm">
-              <span class="font-bold w-16 flex-shrink-0">17:00</span>
-              <span class="flex-grow break-words min-w-0">화장실점검</span>
-              <input type="text" placeholder="메모" class="w-48 flex-shrink-0 mx-2 p-1 border border-gray-300 rounded-md text-sm">
-              <input type="checkbox" class="ml-2 h-5 w-5 text-green-600 rounded flex-shrink-0">
-            </div>
-            <div class="flex items-center p-2 bg-gray-50 rounded-md shadow-sm">
-              <span class="font-bold w-16 flex-shrink-0">17:00</span>
-              <span class="flex-grow break-words min-w-0">유실물 갯수 확인</span>
-              <input type="text" placeholder="메모" class="w-48 flex-shrink-0 mx-2 p-1 border border-gray-300 rounded-md text-sm">
-              <input type="checkbox" class="ml-2 h-5 w-5 text-green-600 rounded flex-shrink-0">
-            </div>
-            <div class="flex items-center p-2 bg-gray-50 rounded-md shadow-sm">
-              <span class="font-bold w-16 flex-shrink-0">17:40</span>
-              <span class="flex-grow break-words min-w-0">KTX 519 여수EXPO 행</span>
-              <input type="text" placeholder="메모" class="w-48 flex-shrink-0 mx-2 p-1 border border-gray-300 rounded-md text-sm">
-              <input type="checkbox" class="ml-2 h-5 w-5 text-green-600 rounded flex-shrink-0">
-            </div>
-          </div>
-        </div>
-      </div>
-
-            <div id="info-night-shift-container" class="shift-direction-container" style="display: none;">
-        <h3 class="text-xl font-semibold mb-3 text-blue-700">야간 방향 선택</h3>
-        <div class="flex justify-center gap-4 mb-4">
-          <button id="showInfoNightUpboundBtn" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition-colors duration-200">상행</button>
-          <button id="showInfoNightDownboundBtn" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition-colors duration-200">하행</button>
-      </div>
-
-      <div id="upbound-info-night-shift-tasks" class="shift-tasks-list" style="display: none;">
-        <h4 class="text-lg font-medium mb-2 text-gray-700">상행 야간 업무 목록</h4>
-        <div class="space-y-3">
-          <div class="flex items-center p-2 bg-gray-50 rounded-md shadow-sm">
-            <span class="font-bold w-16 flex-shrink-0">18:40</span>
-            <span class="flex-grow break-words min-w-0">유실물 갯수 확인</span>
-            <input type="text" placeholder="메모" class="w-48 flex-shrink-0 mx-2 p-1 border border-gray-300 rounded-md text-sm">
-            <input type="checkbox" class="ml-2 h-5 w-5 text-green-600 rounded flex-shrink-0">
-        </div>
-        <div class="flex items-center p-2 bg-gray-50 rounded-md shadow-sm">
-            <span class="font-bold w-16 flex-shrink-0">19:00</span>
-            <span class="flex-grow break-words min-w-0">화장실점검</span>
-            <input type="text" placeholder="메모" class="w-48 flex-shrink-0 mx-2 p-1 border border-gray-300 rounded-md text-sm">
-            <input type="checkbox" class="ml-2 h-5 w-5 text-green-600 rounded flex-shrink-0">
-        </div>
-        <div class="flex items-center p-2 bg-gray-50 rounded-md shadow-sm">
-            <span class="font-bold w-16 flex-shrink-0">19:00</span>
-            <span class="flex-grow break-words min-w-0">수유방점검</span>
-            <input type="text" placeholder="메모" class="w-48 flex-shrink-0 mx-2 p-1 border border-gray-300 rounded-md text-sm">
-            <input type="checkbox" class="ml-2 h-5 w-5 text-green-600 rounded flex-shrink-0">
-        </div>
-        <div class="flex items-center p-2 bg-gray-50 rounded-md shadow-sm">
-            <span class="font-bold w-16 flex-shrink-0">19:30</span>
-            <span class="flex-grow break-words min-w-0">직원주차장 폐쇄</span>
-            <input type="text" placeholder="메모" class="w-48 flex-shrink-0 mx-2 p-1 border border-gray-300 rounded-md text-sm">
-            <input type="checkbox" class="ml-2 h-5 w-5 text-green-600 rounded flex-shrink-0">
-        </div>
-        <div class="flex items-center p-2 bg-gray-50 rounded-md shadow-sm">
-            <span class="font-bold w-16 flex-shrink-0">21:00</span>
-            <span class="flex-grow break-words min-w-0">화장실점검</span>
-            <input type="text" placeholder="메모" class="w-48 flex-shrink-0 mx-2 p-1 border border-gray-300 rounded-md text-sm">
-            <input type="checkbox" class="ml-2 h-5 w-5 text-green-600 rounded flex-shrink-0">
-        </div>
-        <div class="flex items-center p-2 bg-gray-50 rounded-md shadow-sm">
-            <span class="font-bold w-16 flex-shrink-0">23:00</span>
-            <span class="flex-grow break-words min-w-0">화장실점검</span>
-            <input type="text" placeholder="메모" class="w-48 flex-shrink-0 mx-2 p-1 border border-gray-300 rounded-md text-sm">
-            <input type="checkbox" class="ml-2 h-5 w-5 text-green-600 rounded flex-shrink-0">
-        </div>
-        <div class="flex items-center p-2 bg-gray-50 rounded-md shadow-sm">
-            <span class="font-bold w-16 flex-shrink-0">06:00</span>
-            <span class="flex-grow break-words min-w-0">화장실점검</span>
-            <input type="text" placeholder="메모" class="w-48 flex-shrink-0 mx-2 p-1 border border-gray-300 rounded-md text-sm">
-            <input type="checkbox" class="ml-2 h-5 w-5 text-green-600 rounded flex-shrink-0">
-        </div>
-        <div class="flex items-center p-2 bg-gray-50 rounded-md shadow-sm">
-            <span class="font-bold w-16 flex-shrink-0">08:00</span>
-            <span class="flex-grow break-words min-w-0">화장실점검</span>
-            <input type="text" placeholder="메모" class="w-48 flex-shrink-0 mx-2 p-1 border border-gray-300 rounded-md text-sm">
-            <input type="checkbox" class="ml-2 h-5 w-5 text-green-600 rounded flex-shrink-0">
-        </div>
-        <div class="flex items-center p-2 bg-gray-50 rounded-md shadow-sm">
-            <span class="font-bold w-16 flex-shrink-0">08:00</span>
-            <span class="flex-grow break-words min-w-0">유실물 점검</span>
-            <input type="text" placeholder="메모" class="w-48 flex-shrink-0 mx-2 p-1 border border-gray-300 rounded-md text-sm">
-            <input type="checkbox" class="ml-2 h-5 w-5 text-green-600 rounded flex-shrink-0">
-        </div>
-        <div class="flex items-center p-2 bg-gray-50 rounded-md shadow-sm">
-            <span class="font-bold w-16 flex-shrink-0">18:49</span>
-            <span class="flex-grow break-words min-w-0">KTX 520 용산 행</span>
-            <input type="text" placeholder="메모" class="w-48 flex-shrink-0 mx-2 p-1 border border-gray-300 rounded-md text-sm">
-            <input type="checkbox" class="ml-2 h-5 w-5 text-green-600 rounded flex-shrink-0">
-        </div>
-        <div class="flex items-center p-2 bg-gray-50 rounded-md shadow-sm">
-            <span class="font-bold w-16 flex-shrink-0">19:15</span>
-            <span class="flex-grow break-words min-w-0">KTX-산천 522 용산 행</span>
-            <input type="text" placeholder="메모" class="w-48 flex-shrink-0 mx-2 p-1 border border-gray-300 rounded-md text-sm">
-            <input type="checkbox" class="ml-2 h-5 w-5 text-green-600 rounded flex-shrink-0">
-        </div>
-        <div class="flex items-center p-2 bg-gray-50 rounded-md shadow-sm">
-            <span class="font-bold w-16 flex-shrink-0">20:21</span>
-            <span class="flex-grow break-words min-w-0">KTX 590 용산 행</span>
-            <input type="text" placeholder="메모" class="w-48 flex-shrink-0 mx-2 p-1 border border-gray-300 rounded-md text-sm">
-            <input type="checkbox" class="ml-2 h-5 w-5 text-green-600 rounded flex-shrink-0">
-        </div>
-        <div class="flex items-center p-2 bg-gray-50 rounded-md shadow-sm">
-            <span class="font-bold w-16 flex-shrink-0">21:02</span>
-            <span class="flex-grow break-words min-w-0">KTX 524 용산 행</span>
-            <input type="text" placeholder="메모" class="w-48 flex-shrink-0 mx-2 p-1 border border-gray-300 rounded-md text-sm">
-            <input type="checkbox" class="ml-2 h-5 w-5 text-green-600 rounded flex-shrink-0">
-        </div>
-        <div class="flex items-center p-2 bg-gray-50 rounded-md shadow-sm">
-            <span class="font-bold w-16 flex-shrink-0">21:54</span>
-            <span class="flex-grow break-words min-w-0">KTX 526 용산 행</span>
-            <input type="text" placeholder="메모" class="w-48 flex-shrink-0 mx-2 p-1 border border-gray-300 rounded-md text-sm">
-            <input type="checkbox" class="ml-2 h-5 w-5 text-green-600 rounded flex-shrink-0">
-        </div>
-        <div class="flex items-center p-2 bg-gray-50 rounded-md shadow-sm">
-            <span class="font-bold w-16 flex-shrink-0">07:34</span>
-            <span class="flex-grow break-words min-w-0">KTX-산천 582 용산 행</span>
-            <input type="text" placeholder="메모" class="w-48 flex-shrink-0 mx-2 p-1 border border-gray-300 rounded-md text-sm">
-            <input type="checkbox" class="ml-2 h-5 w-5 text-green-600 rounded flex-shrink-0">
-        </div>
-        <div class="flex items-center p-2 bg-gray-50 rounded-md shadow-sm">
-            <span class="font-bold w-16 flex-shrink-0">08:51</span>
-            <span class="flex-grow break-words min-w-0">KTX 584 용산 행</span>
-            <input type="text" placeholder="메모" class="w-48 flex-shrink-0 mx-2 p-1 border border-gray-300 rounded-md text-sm">
-            <input type="checkbox" class="ml-2 h-5 w-5 text-green-600 rounded flex-shrink-0">
-        </div>
-      </div>
-    </div>
-
-    <div id="downbound-info-night-shift-tasks" class="shift-tasks-list" style="display: none;">
-      <h4 class="text-lg font-medium mb-2 text-gray-700">하행 야간 업무 목록</h4>
-      <div class="space-y-3">
-        <div class="flex items-center p-2 bg-gray-50 rounded-md shadow-sm">
-            <span class="font-bold w-16 flex-shrink-0">18:40</span>
-            <span class="flex-grow break-words min-w-0">유실물 갯수 확인</span>
-            <input type="text" placeholder="메모" class="w-48 flex-shrink-0 mx-2 p-1 border border-gray-300 rounded-md text-sm">
-            <input type="checkbox" class="ml-2 h-5 w-5 text-green-600 rounded flex-shrink-0">
-        </div>
-        <div class="flex items-center p-2 bg-gray-50 rounded-md shadow-sm">
-            <span class="font-bold w-16 flex-shrink-0">19:00</span>
-            <span class="flex-grow break-words min-w-0">화장실점검</span>
-            <input type="text" placeholder="메모" class="w-48 flex-shrink-0 mx-2 p-1 border border-gray-300 rounded-md text-sm">
-            <input type="checkbox" class="ml-2 h-5 w-5 text-green-600 rounded flex-shrink-0">
-        </div>
-        <div class="flex items-center p-2 bg-gray-50 rounded-md shadow-sm">
-            <span class="font-bold w-16 flex-shrink-0">19:00</span>
-            <span class="flex-grow break-words min-w-0">수유방점검</span>
-            <input type="text" placeholder="메모" class="w-48 flex-shrink-0 mx-2 p-1 border border-gray-300 rounded-md text-sm">
-            <input type="checkbox" class="ml-2 h-5 w-5 text-green-600 rounded flex-shrink-0">
-        </div>
-        <div class="flex items-center p-2 bg-gray-50 rounded-md shadow-sm">
-            <span class="font-bold w-16 flex-shrink-0">19:30</span>
-            <span class="flex-grow break-words min-w-0">직원주차장 폐쇄</span>
-            <input type="text" placeholder="메모" class="w-48 flex-shrink-0 mx-2 p-1 border border-gray-300 rounded-md text-sm">
-            <input type="checkbox" class="ml-2 h-5 w-5 text-green-600 rounded flex-shrink-0">
-        </div>
-        <div class="flex items-center p-2 bg-gray-50 rounded-md shadow-sm">
-            <span class="font-bold w-16 flex-shrink-0">21:00</span>
-            <span class="flex-grow break-words min-w-0">화장실점검</span>
-            <input type="text" placeholder="메모" class="w-48 flex-shrink-0 mx-2 p-1 border border-gray-300 rounded-md text-sm">
-            <input type="checkbox" class="ml-2 h-5 w-5 text-green-600 rounded flex-shrink-0">
-        </div>
-        <div class="flex items-center p-2 bg-gray-50 rounded-md shadow-sm">
-            <span class="font-bold w-16 flex-shrink-0">23:00</span>
-            <span class="flex-grow break-words min-w-0">화장실점검</span>
-            <input type="text" placeholder="메모" class="w-48 flex-shrink-0 mx-2 p-1 border border-gray-300 rounded-md text-sm">
-            <input type="checkbox" class="ml-2 h-5 w-5 text-green-600 rounded flex-shrink-0">
-        </div>
-        <div class="flex items-center p-2 bg-gray-50 rounded-md shadow-sm">
-            <span class="font-bold w-16 flex-shrink-0">06:00</span>
-            <span class="flex-grow break-words min-w-0">화장실점검</span>
-            <input type="text" placeholder="메모" class="w-48 flex-shrink-0 mx-2 p-1 border border-gray-300 rounded-md text-sm">
-            <input type="checkbox" class="ml-2 h-5 w-5 text-green-600 rounded flex-shrink-0">
-        </div>
-        <div class="flex items-center p-2 bg-gray-50 rounded-md shadow-sm">
-            <span class="font-bold w-16 flex-shrink-0">08:00</span>
-            <span class="flex-grow break-words min-w-0">화장실점검</span>
-            <input type="text" placeholder="메모" class="w-48 flex-shrink-0 mx-2 p-1 border border-gray-300 rounded-md text-sm">
-            <input type="checkbox" class="ml-2 h-5 w-5 text-green-600 rounded flex-shrink-0">
-        </div>
-        <div class="flex items-center p-2 bg-gray-50 rounded-md shadow-sm">
-            <span class="font-bold w-16 flex-shrink-0">08:00</span>
-            <span class="flex-grow break-words min-w-0">유실물 점검</span>
-            <input type="text" placeholder="메모" class="w-48 flex-shrink-0 mx-2 p-1 border border-gray-300 rounded-md text-sm">
-            <input type="checkbox" class="ml-2 h-5 w-5 text-green-600 rounded flex-shrink-0">
-        </div>
-        <div class="flex items-center p-2 bg-gray-50 rounded-md shadow-sm">
-            <span class="font-bold w-16 flex-shrink-0">18:24</span>
-            <span class="flex-grow break-words min-w-0">KTX 521 여수EXPO 행</span>
-            <input type="text" placeholder="메모" class="w-48 flex-shrink-0 mx-2 p-1 border border-gray-300 rounded-md text-sm">
-            <input type="checkbox" class="ml-2 h-5 w-5 text-green-600 rounded flex-shrink-0">
-        </div>
-        <div class="flex items-center p-2 bg-gray-50 rounded-md shadow-sm">
-            <span class="font-bold w-16 flex-shrink-0">19:35</span>
-            <span class="flex-grow break-words min-w-0">KTX-산천 523 여수EXPO 행</span>
-            <input type="text" placeholder="메모" class="w-48 flex-shrink-0 mx-2 p-1 border border-gray-300 rounded-md text-sm">
-            <input type="checkbox" class="ml-2 h-5 w-5 text-green-600 rounded flex-shrink-0">
-        </div>
-        <div class="flex items-center p-2 bg-gray-50 rounded-md shadow-sm">
-            <span class="font-bold w-16 flex-shrink-0">20:25</span>
-            <span class="flex-grow break-words min-w-0">KTX 589 여수EXPO 행</span>
-            <input type="text" placeholder="메모" class="w-48 flex-shrink-0 mx-2 p-1 border border-gray-300 rounded-md text-sm">
-        </div>
-        <div class="flex items-center p-2 bg-gray-50 rounded-md shadow-sm">
-            <span class="font-bold w-16 flex-shrink-0">21:04</span>
-            <span class="flex-grow break-words min-w-0">KTX 525 여수EXPO 행</span>
-            <input type="text" placeholder="메모" class="w-48 flex-shrink-0 mx-2 p-1 border border-gray-300 rounded-md text-sm">
-            <input type="checkbox" class="ml-2 h-5 w-5 text-green-600 rounded flex-shrink-0">
-        </div>
-        <div class="flex items-center p-2 bg-gray-50 rounded-md shadow-sm">
-            <span class="font-bold w-16 flex-shrink-0">21:55</span>
-            <span class="flex-grow break-words min-w-0">KTX 527 여수EXPO 행</span>
-            <input type="text" placeholder="메모" class="w-48 flex-shrink-0 mx-2 p-1 border border-gray-300 rounded-md text-sm">
-            <input type="checkbox" class="ml-2 h-5 w-5 text-green-600 rounded flex-shrink-0">
-        </div>
-      </div>
-    </div>
-  </div>
-  </div>
-    <div id="ticketing-section" class="task-section" style="display: none;">
-    <h2 class="text-2xl font-bold mb-4 text-gray-800">매표 업무</h2>
-    <div class="flex justify-center gap-4 mb-4">
-      <button id="showTicketingDayShiftBtn" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition-colors duration-200">주간</button>
-      <button id="showTicketingNightShiftBtn" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition-colors duration-200">야간</button>
-    </div>
-
-    <div id="ticketing-day-shift-tasks" class="shift-tasks-list">
-      <h3 class="text-xl font-semibold mb-3 text-blue-700">주간 업무</h3>
-      <div class="space-y-3">
-              </div>
-    </div>
-
-    <div id="ticketing-night-shift-tasks" class="shift-tasks-list" style="display: none;">
-      <h3 class="text-xl font-semibold mb-3 text-blue-700">야간 업무</h3>
-      <div class="space-y-3">
-              </div>
-    </div>
-  </div>
-
-    <div class="flex justify-center mt-8">
-    <button id="backToCalendarBtn" class="px-6 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400 transition-colors duration-200">
-      캘린더로 돌아가기
-    </button>
-  </div>
-  </div>
-<script type="module">
-    // DOM 요소 참조
-    const patternSelectionPage = document.getElementById('pattern-selection-page');
-    const calendarPage = document.getElementById('calendar-page');
-    const taskPage = document.getElementById('task-page');
-
-    const goToCalendarBtn = document.getElementById('goToCalendarBtn');
-    const backToSelectionBtn = document.getElementById('backToSelectionBtn');
-    const goToTasksPageBtn = document.getElementById('goToTasksPageBtn');
-    const backToCalendarBtn = document.getElementById('backToCalendarBtn');
-
-    const showInfoSectionBtn = document.getElementById('showInfoSectionBtn');
-    const showTicketingSectionBtn = document.getElementById('showTicketingSectionBtn');
-    const infoSection = document.getElementById('info-section');
-    const ticketingSection = document.getElementById('ticketing-section');
-    const taskPageTitle = document.getElementById('taskPageTitle');
-
-    const showInfoDayShiftBtn = document.getElementById('showInfoDayShiftBtn');
-    const showInfoNightShiftBtn = document.getElementById('showInfoNightShiftBtn');
-    const infoDayShiftContainer = document.getElementById('info-day-shift-container');
-    const infoNightShiftContainer = document.getElementById('info-night-shift-container');
-
-    const showTicketingDayShiftBtn = document.getElementById('showTicketingDayShiftBtn');
-    const showTicketingNightShiftBtn = document.getElementById('showTicketingNightShiftBtn');
-    const ticketingDayShiftTasks = document.getElementById('ticketing-day-shift-tasks');
-    const ticketingNightShiftTasks = document.getElementById('ticketing-night-shift-tasks');
-
-    const showInfoDayUpboundBtn = document.getElementById('showInfoDayUpboundBtn');
-    const showInfoDayDownboundBtn = document.getElementById('showInfoDayDownboundBtn');
-    const upboundInfoDayShiftTasks = document.getElementById('upbound-info-day-shift-tasks');
-    const downboundInfoDayShiftTasks = document.getElementById('downbound-info-day-shift-tasks');
-
-    const showInfoNightUpboundBtn = document.getElementById('showInfoNightUpboundBtn');
-    const showInfoNightDownboundBtn = document.getElementById('showInfoNightDownboundBtn');
-    const upboundInfoNightShiftTasks = document.getElementById('upbound-info-night-shift-tasks');
-    const downboundInfoNightShiftTasks = document.getElementById('downbound-info-night-shift-tasks');
-
-
-    // 캘린더 관련 DOM 요소
-    const currentMonthYear = document.getElementById('currentMonthYear');
-    const prevMonthBtn = document.getElementById('prevMonthBtn');
-    const nextMonthBtn = document.getElementById('nextMonthBtn');
-    const calendar = document.getElementById('calendar');
-    const selectedTeamDisplay = document.getElementById('selectedTeamDisplay');
-    const todayDateDisplay = document.getElementById('today-date');
-
-    // 초기 상태
-    let selectedTeam = 'A'; // 기본값
-    let currentMonth = new Date().getMonth();
-    let currentYear = new Date().getFullYear();
-
-    // 가상의 근무 일정 데이터 (사용자 입력 기반)
-    // 2025년 8월 9일은 A조가 주간근무라는 정보를 반영
-    // 다른 날짜와 조의 근무는 가상의 순환 패턴으로 설정
-    const shiftPattern = ['day', 'night', 'off', 'off']; // 4일 주기 순환
-    const getShift = (team, day) => {
-      const teams = ['A', 'B', 'C', 'D'];
-      const teamIndex = teams.indexOf(team);
-      if (teamIndex === -1) return 'off';
-      
-      // 2025-08-09 (토)를 기준으로 A조 주간 근무 설정
-      // 이를 기준으로 근무 형태가 순환되도록 조정
-      const startDay = new Date('2025-08-09');
-      const diffInDays = Math.floor((day - startDay) / (1000 * 60 * 60 * 24));
-      
-      // A조 시작점을 8월 9일 주간으로 맞춤
-      const aShiftStart = 0; // 주간
-      const aShiftIndex = (aShiftStart + diffInDays) % shiftPattern.length;
-
-      // B, C, D조는 A조와 순차적으로 근무하도록 조정
-      const bShiftIndex = (aShiftIndex + 1) % shiftPattern.length;
-      const cShiftIndex = (aShiftIndex + 2) % shiftPattern.length;
-      const dShiftIndex = (aShiftIndex + 3) % shiftPattern.length;
-
-      const shiftIndices = { 'A': aShiftIndex, 'B': bShiftIndex, 'C': cShiftIndex, 'D': dShiftIndex };
-      return shiftPattern[shiftIndices[team]];
-    };
-
-
-    // 함수: 페이지 전환
-    function showPage(pageId) {
-      patternSelectionPage.style.display = 'none';
-      calendarPage.style.display = 'none';
-      taskPage.style.display = 'none';
-
-      if (pageId === 'pattern-selection-page') {
-        patternSelectionPage.style.display = 'flex';
-      } else if (pageId === 'calendar-page') {
-        calendarPage.style.display = 'block';
-        renderCalendar();
-      } else if (pageId === 'task-page') {
-        taskPage.style.display = 'block';
-      }
-    }
-
-    // 함수: 캘린더 렌더링
-    function renderCalendar() {
-      calendar.innerHTML = '';
-      const firstDay = new Date(currentYear, currentMonth, 1);
-      const lastDay = new Date(currentYear, currentMonth + 1, 0);
-      const daysInMonth = lastDay.getDate();
-      const startDayOfWeek = (firstDay.getDay() + 6) % 7; // 월요일을 0으로 맞춤
-
-      currentMonthYear.textContent = `${currentYear}년 ${currentMonth + 1}월`;
-
-      const today = new Date();
-      if (today.getMonth() === currentMonth && today.getFullYear() === currentYear) {
-        todayDateDisplay.textContent = `오늘: ${today.getFullYear()}년 ${today.getMonth() + 1}월 ${today.getDate()}일`;
-      } else {
-        todayDateDisplay.textContent = '';
-      }
-      
-      // 이전 달 날짜 채우기 (회색으로 표시)
-      for (let i = 0; i < startDayOfWeek; i++) {
-        const prevMonthLastDay = new Date(currentYear, currentMonth, 0).getDate();
-        const dayElement = document.createElement('div');
-        dayElement.classList.add('p-2', 'text-center', 'text-gray-400');
-        dayElement.textContent = prevMonthLastDay - startDayOfWeek + 1 + i;
-        calendar.appendChild(dayElement);
-      }
-
-      for (let i = 1; i <= daysInMonth; i++) {
-        const dayElement = document.createElement('div');
-        dayElement.classList.add('p-2', 'text-center', 'border', 'rounded-md', 'transition-colors', 'duration-200', 'cursor-pointer');
-        
-        const date = new Date(currentYear, currentMonth, i);
-        const dayIndex = date.getDay(); // 0:일, 1:월, ..., 6:토
-        
-        // 요일에 따른 색상 적용 (토: 파랑, 일: 빨강)
-        if (dayIndex === 0) {
-          dayElement.classList.add('text-red-500');
-        } else if (dayIndex === 6) {
-          dayElement.classList.add('text-blue-500');
-        }
-
-        // 오늘 날짜 하이라이트
-        if (i === today.getDate() && currentMonth === today.getMonth() && currentYear === today.getFullYear()) {
-          dayElement.classList.add('bg-green-500', 'text-white', 'font-bold');
-        } else {
-          dayElement.classList.add('bg-white', 'text-gray-800', 'hover:bg-gray-200');
-        }
-
-        // 근무 형태 표시
-        const shift = getShift(selectedTeam, date);
-        let shiftText = '';
-        let shiftClass = '';
-
-        if (shift === 'day') {
-          shiftText = '주간';
-          shiftClass = 'shift-day';
-        } else if (shift === 'night') {
-          shiftText = '야간';
-          shiftClass = 'shift-night';
-        } else {
-          shiftText = '휴무';
-          shiftClass = 'shift-off';
-        }
-        
-        // 이미 오늘 날짜라면 배경색을 유지하고 폰트만 변경
-        if (i === today.getDate() && currentMonth === today.getMonth() && currentYear === today.getFullYear()) {
-          dayElement.classList.remove('bg-white', 'hover:bg-gray-200', 'text-gray-800');
-          dayElement.classList.add('bg-green-500', 'text-white');
-        } else {
-          dayElement.classList.remove('bg-green-500', 'text-white', 'font-bold');
-          dayElement.classList.add('bg-white', 'text-gray-800', 'hover:bg-gray-200');
-          dayElement.classList.add(shiftClass);
-        }
-
-
-        dayElement.innerHTML = `
-          <div class="text-lg font-bold mb-1">${i}</div>
-          <div class="text-xs font-semibold">${shiftText}</div>
-        `;
-        calendar.appendChild(dayElement);
-      }
-    }
-
-    // 함수: 업무 섹션 및 교대/방향 전환
-    function switchTaskSection(section) {
-      if (section === 'info') {
-        infoSection.style.display = 'block';
-        ticketingSection.style.display = 'none';
-        taskPageTitle.textContent = '안내 업무';
-      } else if (section === 'ticketing') {
-        infoSection.style.display = 'none';
-        ticketingSection.style.display = 'block';
-        taskPageTitle.textContent = '매표 업무';
-      }
-    }
-
-    function switchShift(shift, type) {
-      if (type === 'info') {
-        if (shift === 'day') {
-          infoDayShiftContainer.style.display = 'block';
-          infoNightShiftContainer.style.display = 'none';
-        } else if (shift === 'night') {
-          infoDayShiftContainer.style.display = 'none';
-          infoNightShiftContainer.style.display = 'block';
-        }
-      } else if (type === 'ticketing') {
-        if (shift === 'day') {
-          ticketingDayShiftTasks.style.display = 'block';
-          ticketingNightShiftTasks.style.display = 'none';
-        } else if (shift === 'night') {
-          ticketingDayShiftTasks.style.display = 'none';
-          ticketingNightShiftTasks.style.display = 'block';
-        }
-      }
-    }
-
-    function switchDirection(direction, shift) {
-      if (shift === 'day') {
-        if (direction === 'upbound') {
-          upboundInfoDayShiftTasks.style.display = 'block';
-          downboundInfoDayShiftTasks.style.display = 'none';
-        } else if (direction === 'downbound') {
-          upboundInfoDayShiftTasks.style.display = 'none';
-          downboundInfoDayShiftTasks.style.display = 'block';
-        }
-      } else if (shift === 'night') {
-        if (direction === 'upbound') {
-          upboundInfoNightShiftTasks.style.display = 'block';
-          downboundInfoNightShiftTasks.style.display = 'none';
-        } else if (direction === 'downbound') {
-          upboundInfoNightShiftTasks.style.display = 'none';
-          downboundInfoNightShiftTasks.style.display = 'block';
-        }
-      }
-    }
-
-    // 이벤트 리스너
-    goToCalendarBtn.addEventListener('click', () => {
-      const selectedRadio = document.querySelector('input[name="selectPattern"]:checked');
-      if (selectedRadio) {
-        selectedTeam = selectedRadio.value;
-        selectedTeamDisplay.textContent = `${selectedTeam}조`;
-        showPage('calendar-page');
-      }
-    });
-
-    backToSelectionBtn.addEventListener('click', () => showPage('pattern-selection-page'));
-    goToTasksPageBtn.addEventListener('click', () => {
-      showPage('task-page');
-      switchTaskSection('info');
-      switchShift('day', 'info');
-      switchDirection('upbound', 'day');
-    });
-    backToCalendarBtn.addEventListener('click', () => showPage('calendar-page'));
-
-    prevMonthBtn.addEventListener('click', () => {
-      currentMonth--;
-      if (currentMonth < 0) {
-        currentMonth = 11;
-        currentYear--;
-      }
-      renderCalendar();
-    });
-
-    nextMonthBtn.addEventListener('click', () => {
-      currentMonth++;
-      if (currentMonth > 11) {
-        currentMonth = 0;
-        currentYear++;
-      }
-      renderCalendar();
-    });
-
-    showInfoSectionBtn.addEventListener('click', () => {
-      switchTaskSection('info');
-      switchShift('day', 'info');
-      switchDirection('upbound', 'day');
-    });
-    showTicketingSectionBtn.addEventListener('click', () => {
-      switchTaskSection('ticketing');
-      switchShift('day', 'ticketing');
-    });
-
-    showInfoDayShiftBtn.addEventListener('click', () => {
-      switchShift('day', 'info');
-      switchDirection('upbound', 'day');
-    });
-    showInfoNightShiftBtn.addEventListener('click', () => {
-      switchShift('night', 'info');
-      switchDirection('upbound', 'night');
-    });
-
-    showTicketingDayShiftBtn.addEventListener('click', () => switchShift('day', 'ticketing'));
-    showTicketingNightShiftBtn.addEventListener('click', () => switchShift('night', 'ticketing'));
-
-    showInfoDayUpboundBtn.addEventListener('click', () => switchDirection('upbound', 'day'));
-    showInfoDayDownboundBtn.addEventListener('click', () => switchDirection('downbound', 'day'));
-
-    showInfoNightUpboundBtn.addEventListener('click', () => switchDirection('upbound', 'night'));
-    showInfoNightDownboundBtn.addEventListener('click', () => switchDirection('downbound', 'night'));
-
-    // 초기 로딩
-    showPage('pattern-selection-page');
-  </script>
+<table class="calendar">
+  <thead>
+    <tr>
+      <th>일</th>
+      <th>월</th>
+      <th>화</th>
+      <th>수</th>
+      <th>목</th>
+      <th>금</th>
+      <th>토</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="holiday">
+        <div class="day-header"></div>
+      </td>
+      <td class="day">
+        <div class="day-header"></div>
+      </td>
+      <td class="day">
+        <div class="day-header"></div>
+      </td>
+      <td class="day">
+        <div class="day-header"></div>
+      </td>
+      <td class="day">
+        <div class="day-header"></div>
+      </td>
+      <td>
+        <div class="day-header">1</div>
+        <div class="duty-cell day">A조 주간</div>
+        <div class="duty-cell night">B조 야간</div>
+        <div class="duty-cell off-duty">C조 비번</div>
+        <div class="duty-cell holiday">D조 휴무</div>
+      </td>
+      <td>
+        <div class="day-header">2</div>
+        <div class="duty-cell night">A조 야간</div>
+        <div class="duty-cell off-duty">B조 비번</div>
+        <div class="duty-cell holiday">C조 휴무</div>
+        <div class="duty-cell day">D조 주간</div>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <div class="day-header">3</div>
+        <div class="duty-cell off-duty">A조 비번</div>
+        <div class="duty-cell holiday">B조 휴무</div>
+        <div class="duty-cell day">C조 주간</div>
+        <div class="duty-cell night">D조 야간</div>
+      </td>
+      <td>
+        <div class="day-header">4</div>
+        <div class="duty-cell holiday">A조 휴무</div>
+        <div class="duty-cell day">B조 주간</div>
+        <div class="duty-cell night">C조 야간</div>
+        <div class="duty-cell off-duty">D조 비번</div>
+      </td>
+      <td>
+        <div class="day-header">5</div>
+        <div class="duty-cell day">A조 주간</div>
+        <div class="duty-cell night">B조 야간</div>
+        <div class="duty-cell off-duty">C조 비번</div>
+        <div class="duty-cell holiday">D조 휴무</div>
+      </td>
+      <td>
+        <div class="day-header">6</div>
+        <div class="duty-cell night">A조 야간</div>
+        <div class="duty-cell off-duty">B조 비번</div>
+        <div class="duty-cell holiday">C조 휴무</div>
+        <div class="duty-cell day">D조 주간</div>
+      </td>
+      <td>
+        <div class="day-header">7</div>
+        <div class="duty-cell off-duty">A조 비번</div>
+        <div class="duty-cell holiday">B조 휴무</div>
+        <div class="duty-cell day">C조 주간</div>
+        <div class="duty-cell night">D조 야간</div>
+      </td>
+      <td>
+        <div class="day-header">8</div>
+        <div class="duty-cell holiday">A조 휴무</div>
+        <div class="duty-cell day">B조 주간</div>
+        <div class="duty-cell night">C조 야간</div>
+        <div class="duty-cell off-duty">D조 비번</div>
+      </td>
+      <td>
+        <div class="day-header">9</div>
+        <div class="duty-cell day">A조 주간</div>
+        <div class="duty-cell night">B조 야간</div>
+        <div class="duty-cell off-duty">C조 비번</div>
+        <div class="duty-cell holiday">D조 휴무</div>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <div class="day-header">10</div>
+        <div class="duty-cell night">A조 야간</div>
+        <div class="duty-cell off-duty">B조 비번</div>
+        <div class="duty-cell holiday">C조 휴무</div>
+        <div class="duty-cell day">D조 주간</div>
+      </td>
+      <td>
+        <div class="day-header">11</div>
+        <div class="duty-cell off-duty">A조 비번</div>
+        <div class="duty-cell holiday">B조 휴무</div>
+        <div class="duty-cell day">C조 주간</div>
+        <div class="duty-cell night">D조 야간</div>
+      </td>
+      <td>
+        <div class="day-header">12</div>
+        <div class="duty-cell holiday">A조 휴무</div>
+        <div class="duty-cell day">B조 주간</div>
+        <div class="duty-cell night">C조 야간</div>
+        <div class="duty-cell off-duty">D조 비번</div>
+      </td>
+      <td>
+        <div class="day-header">13</div>
+        <div class="duty-cell day">A조 주간</div>
+        <div class="duty-cell night">B조 야간</div>
+        <div class="duty-cell off-duty">C조 비번</div>
+        <div class="duty-cell holiday">D조 휴무</div>
+      </td>
+      <td>
+        <div class="day-header">14</div>
+        <div class="duty-cell night">A조 야간</div>
+        <div class="duty-cell off-duty">B조 비번</div>
+        <div class="duty-cell holiday">C조 휴무</div>
+        <div class="duty-cell day">D조 주간</div>
+      </td>
+      <td>
+        <div class="day-header">15</div>
+        <div class="duty-cell off-duty">A조 비번</div>
+        <div class="duty-cell holiday">B조 휴무</div>
+        <div class="duty-cell day">C조 주간</div>
+        <div class="duty-cell night">D조 야간</div>
+      </td>
+      <td>
+        <div class="day-header">16</div>
+        <div class="duty-cell holiday">A조 휴무</div>
+        <div class="duty-cell day">B조 주간</div>
+        <div class="duty-cell night">C조 야간</div>
+        <div class="duty-cell off-duty">D조 비번</div>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <div class="day-header">17</div>
+        <div class="duty-cell day">A조 주간</div>
+        <div class="duty-cell night">B조 야간</div>
+        <div class="duty-cell off-duty">C조 비번</div>
+        <div class="duty-cell holiday">D조 휴무</div>
+      </td>
+      <td>
+        <div class="day-header">18</div>
+        <div class="duty-cell night">A조 야간</div>
+        <div class="duty-cell off-duty">B조 비번</div>
+        <div class="duty-cell holiday">C조 휴무</div>
+        <div class="duty-cell day">D조 주간</div>
+      </td>
+      <td>
+        <div class="day-header">19</div>
+        <div class="duty-cell off-duty">A조 비번</div>
+        <div class="duty-cell holiday">B조 휴무</div>
+        <div class="duty-cell day">C조 주간</div>
+        <div class="duty-cell night">D조 야간</div>
+      </td>
+      <td>
+        <div class="day-header">20</div>
+        <div class="duty-cell holiday">A조 휴무</div>
+        <div class="duty-cell day">B조 주간</div>
+        <div class="duty-cell night">C조 야간</div>
+        <div class="duty-cell off-duty">D조 비번</div>
+      </td>
+      <td>
+        <div class="day-header">21</div>
+        <div class="duty-cell day">A조 주간</div>
+        <div class="duty-cell night">B조 야간</div>
+        <div class="duty-cell off-duty">C조 비번</div>
+        <div class="duty-cell holiday">D조 휴무</div>
+      </td>
+      <td>
+        <div class="day-header">22</div>
+        <div class="duty-cell night">A조 야간</div>
+        <div class="duty-cell off-duty">B조 비번</div>
+        <div class="duty-cell holiday">C조 휴무</div>
+        <div class="duty-cell day">D조 주간</div>
+      </td>
+      <td>
+        <div class="day-header">23</div>
+        <div class="duty-cell off-duty">A조 비번</div>
+        <div class="duty-cell holiday">B조 휴무</div>
+        <div class="duty-cell day">C조 주간</div>
+        <div class="duty-cell night">D조 야간</div>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <div class="day-header">24</div>
+        <div class="duty-cell holiday">A조 휴무</div>
+        <div class="duty-cell day">B조 주간</div>
+        <div class="duty-cell night">C조 야간</div>
+        <div class="duty-cell off-duty">D조 비번</div>
+      </td>
+      <td>
+        <div class="day-header">25</div>
+        <div class="duty-cell day">A조 주간</div>
+        <div class="duty-cell night">B조 야간</div>
+        <div class="duty-cell off-duty">C조 비번</div>
+        <div class="duty-cell holiday">D조 휴무</div>
+      </td>
+      <td>
+        <div class="day-header">26</div>
+        <div class="duty-cell night">A조 야간</div>
+        <div class="duty-cell off-duty">B조 비번</div>
+        <div class="duty-cell holiday">C조 휴무</div>
+        <div class="duty-cell day">D조 주간</div>
+      </td>
+      <td>
+        <div class="day-header">27</div>
+        <div class="duty-cell off-duty">A조 비번</div>
+        <div class="duty-cell holiday">B조 휴무</div>
+        <div class="duty-cell day">C조 주간</div>
+        <div class="duty-cell night">D조 야간</div>
+      </td>
+      <td>
+        <div class="day-header">28</div>
+        <div class="duty-cell holiday">A조 휴무</div>
+        <div class="duty-cell day">B조 주간</div>
+        <div class="duty-cell night">C조 야간</div>
+        <div class="duty-cell off-duty">D조 비번</div>
+      </td>
+      <td>
+        <div class="day-header">29</div>
+        <div class="duty-cell day">A조 주간</div>
+        <div class="duty-cell night">B조 야간</div>
+        <div class="duty-cell off-duty">C조 비번</div>
+        <div class="duty-cell holiday">D조 휴무</div>
+      </td>
+      <td>
+        <div class="day-header">30</div>
+        <div class="duty-cell night">A조 야간</div>
+        <div class="duty-cell off-duty">B조 비번</div>
+        <div class="duty-cell holiday">C조 휴무</div>
+        <div class="duty-cell day">D조 주간</div>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <div class="day-header">31</div>
+        <div class="duty-cell off-duty">A조 비번</div>
+        <div class="duty-cell holiday">B조 휴무</div>
+        <div class="duty-cell day">C조 주간</div>
+        <div class="duty-cell night">D조 야간</div>
+      </td>
+      <td class="day">
+        <div class="day-header"></div>
+      </td>
+      <td class="day">
+        <div class="day-header"></div>
+      </td>
+      <td class="day">
+        <div class="day-header"></div>
+      </td>
+      <td class="day">
+        <div class="day-header"></div>
+      </td>
+      <td class="day">
+        <div class="day-header"></div>
+      </td>
+      <td class="day">
+        <div class="day-header"></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
 
 </body>
 </html>
