@@ -5,24 +5,138 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>근무 스케줄</title>
   <style>
-    *{box-sizing:border-box}html,body{width:100%;overflow-x:hidden}body{margin:0;font-family:Arial,sans-serif;background:#f4f6fb;color:#1f2937;padding-bottom:76px}header{background:#2563eb;color:white;padding:16px;text-align:center;font-size:20px;font-weight:700}.container{width:100%;max-width:960px;margin:0 auto;padding:14px}.topbar{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:10px 0 14px}.topbar h2{margin:0;font-size:20px;white-space:nowrap}button{border:0;border-radius:10px;padding:10px 14px;background:#2563eb;color:white;font-weight:700;cursor:pointer}.calendar{width:100%;display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}.weekday{min-width:0;text-align:center;padding:8px 0;font-weight:800;color:#374151}.weekday.sun{color:#dc2626}.weekday.sat{color:#2563eb}.day{min-width:0;min-height:82px;background:white;border-radius:12px;padding:7px;border:2px solid transparent;box-shadow:0 1px 3px rgba(0,0,0,.06);cursor:pointer;overflow:hidden}.day.empty{background:transparent;box-shadow:none;cursor:default}.date-number{font-weight:800;font-size:14px}.my-shift{margin:6px 0 5px;display:inline-block;max-width:100%;padding:3px 7px;border-radius:999px;font-size:12px;font-weight:800;background:#eef2ff;color:#3730a3}.my-shift.edited{background:#fef3c7;color:#92400e}.others-row{display:flex;gap:4px;flex-wrap:nowrap;align-items:center;font-size:10.5px;white-space:nowrap;overflow:hidden}.other-shift{padding:2px 5px;border-radius:999px;background:#f3f4f6;font-weight:700}.today{border-color:#2563eb;background:#eff6ff;position:relative}.today::after{content:"TODAY";position:absolute;top:5px;right:6px;color:#2563eb;font-size:9px;font-weight:900}.team-select{margin:18px 0 8px;background:white;border-radius:14px;padding:14px;box-shadow:0 1px 4px rgba(0,0,0,.08)}.team-options{display:flex;justify-content:space-around;margin-top:10px}.team-options label{font-weight:800}.hint{margin-top:10px;font-size:12px;color:#6b7280;line-height:1.4}.tab-page{display:none}.tab-page.active{display:block}.bottom-nav{position:fixed;left:0;right:0;bottom:0;background:white;border-top:1px solid #e5e7eb;display:flex;justify-content:center;gap:8px;padding:8px 10px;z-index:10}.nav-btn{flex:1;max-width:240px;background:#e5e7eb;color:#374151}.nav-btn.active{background:#2563eb;color:white}.card{background:white;border-radius:16px;padding:16px;box-shadow:0 1px 4px rgba(0,0,0,.08);margin-bottom:14px}.step-title{font-size:21px;font-weight:900;margin:0 0 6px}.step-sub{color:#6b7280;margin:0 0 16px}.choice-grid{display:grid;grid-template-columns:1fr;gap:10px}.choice{width:100%;text-align:left;padding:16px;border-radius:14px;background:#f8fafc;color:#111827;border:1px solid #e5e7eb;font-size:17px;display:flex;justify-content:space-between;align-items:center}.choice span{color:#6b7280;font-size:13px;font-weight:500}.back{background:#6b7280;margin-bottom:12px}.summary{font-size:14px;color:#4b5563;margin-bottom:12px}.check-item{display:flex;gap:10px;align-items:center;padding:12px 0;border-bottom:1px solid #eef2f7}.check-item input{width:20px;height:20px}textarea{width:100%;min-height:90px;border:1px solid #d1d5db;border-radius:12px;padding:12px;font-size:15px}.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:30;align-items:center;justify-content:center;padding:18px}.modal-bg.active{display:flex}.modal{width:100%;max-width:360px;background:white;border-radius:18px;padding:18px;box-shadow:0 15px 40px rgba(0,0,0,.22)}.modal h3{margin:0 0 8px;font-size:20px}.modal p{margin:0 0 14px;color:#6b7280;font-size:14px}.modal-label{display:block;margin:8px 0 5px;font-size:13px;font-weight:800;color:#374151}.shift-select{width:100%;padding:12px;border:1px solid #d1d5db;border-radius:12px;font-size:16px;margin-bottom:8px}.modal-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}.red{background:#ef4444}.gray{background:#6b7280}@media(max-width:620px){body{padding-bottom:70px}header{font-size:18px;padding:13px}.container{padding:6px}.topbar{gap:5px;margin:8px 0 10px}.topbar h2{font-size:16px}button{padding:8px 9px;border-radius:9px;font-size:13px}.calendar{gap:2px}.weekday{font-size:12px;padding:6px 0}.day{min-height:66px;padding:3px;border-radius:8px;border-width:1.5px}.date-number{font-size:11px}.my-shift{font-size:9.5px;padding:2px 4px;margin:4px 0 3px}.others-row{gap:1px;font-size:7.4px;letter-spacing:-.4px}.other-shift{padding:1px 2px}.today::after{font-size:6.5px;top:3px;right:3px}.team-select{padding:12px;margin-top:14px}.team-options label{font-size:14px}.bottom-nav{padding:7px 8px}.nav-btn{font-size:13px}}
+    *{box-sizing:border-box}html,body{width:100%;overflow-x:hidden}body{margin:0;font-family:Arial,sans-serif;background:#f4f6fb;color:#1f2937;padding-bottom:74px}header{background:#2563eb;color:#fff;text-align:center;padding:15px;font-weight:800;font-size:20px}.container{width:100%;max-width:980px;margin:0 auto;padding:12px}.topbar{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:8px 0 12px}.topbar h2{margin:0;font-size:20px;white-space:nowrap}button{border:0;border-radius:10px;padding:10px 14px;background:#2563eb;color:#fff;font-weight:800;cursor:pointer}.calendar{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px;width:100%}.weekday{text-align:center;font-weight:900;padding:8px 0;color:#374151}.weekday.sun{color:#dc2626}.weekday.sat{color:#2563eb}.day{min-width:0;min-height:92px;background:#fff;border-radius:13px;padding:7px;border:2px solid transparent;box-shadow:0 1px 4px rgba(0,0,0,.07);cursor:pointer;overflow:hidden}.day.empty{background:transparent;box-shadow:none;cursor:default}.date-number{font-weight:900;font-size:14px}.base-shift{display:inline-block;margin-top:5px;padding:3px 7px;border-radius:999px;background:#eef2ff;color:#3730a3;font-size:12px;font-weight:900;max-width:100%}.base-shift.edited{background:#fef3c7;color:#92400e}.extra-shift{margin-top:4px;font-size:10.5px;font-weight:900;color:#b45309;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.others-row{display:flex;gap:3px;flex-wrap:nowrap;margin-top:4px;font-size:9.5px;white-space:nowrap;overflow:hidden}.other-shift{background:#f3f4f6;border-radius:999px;padding:2px 4px;font-weight:800}.today{border-color:#2563eb;background:#eff6ff;position:relative}.today::after{content:"TODAY";position:absolute;top:5px;right:6px;color:#2563eb;font-size:9px;font-weight:900}.team-select,.card{background:#fff;border-radius:15px;padding:14px;box-shadow:0 1px 5px rgba(0,0,0,.08);margin-top:16px}.team-options{display:flex;justify-content:space-around;margin-top:10px}.team-options label{font-weight:900}.hint{margin-top:10px;font-size:12px;color:#6b7280;line-height:1.45}.tab-page{display:none}.tab-page.active{display:block}.bottom-nav{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid #e5e7eb;display:flex;gap:8px;padding:8px 10px;z-index:20}.nav-btn{flex:1;background:#e5e7eb;color:#374151}.nav-btn.active{background:#2563eb;color:#fff}.step-title{font-size:21px;font-weight:900;margin:0 0 6px}.step-sub{color:#6b7280;margin:0 0 16px}.choice-grid{display:grid;gap:10px}.choice{width:100%;text-align:left;padding:16px;border-radius:14px;background:#f8fafc;color:#111827;border:1px solid #e5e7eb;font-size:17px;display:flex;justify-content:space-between;align-items:center}.choice span{color:#6b7280;font-size:13px}.back,.gray{background:#6b7280}.red{background:#ef4444}.summary{font-size:14px;color:#4b5563;margin-bottom:12px}.check-item{display:flex;gap:10px;align-items:center;padding:12px 0;border-bottom:1px solid #eef2f7}.check-item input{width:20px;height:20px}textarea{width:100%;min-height:90px;border:1px solid #d1d5db;border-radius:12px;padding:12px;font-size:15px}.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:30;align-items:center;justify-content:center;padding:18px}.modal-bg.active{display:flex}.modal{width:100%;max-width:370px;background:#fff;border-radius:18px;padding:18px;box-shadow:0 15px 40px rgba(0,0,0,.22)}.modal h3{margin:0 0 8px;font-size:20px}.modal p{margin:0 0 12px;color:#6b7280;font-size:14px}.modal-label{display:block;margin:9px 0 5px;font-size:13px;font-weight:900;color:#374151}.shift-select{width:100%;padding:12px;border:1px solid #d1d5db;border-radius:12px;font-size:16px;margin-bottom:8px}.modal-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}@media(max-width:620px){body{padding-bottom:70px}header{font-size:18px;padding:13px}.container{padding:6px}.topbar{gap:5px;margin:8px 0 10px}.topbar h2{font-size:16px}button{padding:8px 9px;border-radius:9px;font-size:13px}.calendar{gap:2px}.weekday{font-size:12px;padding:6px 0}.day{min-height:74px;padding:3px;border-radius:8px;border-width:1.5px}.date-number{font-size:11px}.base-shift{font-size:9px;padding:2px 4px;margin-top:3px}.extra-shift{font-size:7.8px;margin-top:2px;letter-spacing:-.4px}.others-row{gap:1px;font-size:6.9px;letter-spacing:-.5px;margin-top:2px}.other-shift{padding:1px 2px}.today::after{font-size:6px;top:3px;right:3px}.team-select{padding:12px;margin-top:12px}.team-options label{font-size:14px}.bottom-nav{padding:7px 8px}.nav-btn{font-size:13px}}
   </style>
 </head>
 <body>
 <header>근무 스케줄</header>
-<div id="calendarPage" class="tab-page active"><div class="container"><div class="topbar"><button onclick="prevMonth()">이전</button><h2 id="monthTitle"></h2><button onclick="nextMonth()">다음</button></div><div class="calendar" id="calendar"></div><div class="team-select"><strong>근무조 선택</strong><div class="team-options"><label><input type="radio" name="team" value="A" checked> A조</label><label><input type="radio" name="team" value="B"> B조</label><label><input type="radio" name="team" value="C"> C조</label><label><input type="radio" name="team" value="D"> D조</label></div><div class="hint">날짜를 누르면 내 근무를 바꾸거나 1/4·1/2 추가근무를 함께 저장할 수 있습니다. 예: 휴무 + D 1/4</div></div></div></div>
-<div id="workPage" class="tab-page"><div class="container"><div class="card" id="workCard"></div></div></div>
-<div id="shiftModal" class="modal-bg" onclick="closeShiftModal(event)"><div class="modal" onclick="event.stopPropagation()"><h3 id="modalTitle">근무 변경</h3><p id="modalDesc"></p><label class="modal-label">내 근무</label><select id="baseShiftSelect" class="shift-select"><option value="주간">주간</option><option value="야간">야간</option><option value="비번">비번</option><option value="휴무">휴무</option></select><label class="modal-label">추가근무</label><select id="extraShiftSelect" class="shift-select" onchange="toggleAssistTeam()"><option value="">없음</option><option value="1/4">1/4 근무</option><option value="1/2">1/2 근무</option></select><div id="assistTeamBox"><label class="modal-label">들어가는 조</label><select id="assistTeamSelect" class="shift-select"><option value="A">A조</option><option value="B">B조</option><option value="C">C조</option><option value="D">D조</option></select></div><div class="modal-actions"><button onclick="saveManualShift()">저장</button><button class="gray" onclick="hideShiftModal()">취소</button><button class="red" onclick="clearManualShift()">기본값</button><button class="gray" onclick="hideShiftModal()">닫기</button></div></div></div>
-<div class="bottom-nav"><button class="nav-btn active" id="calendarNav" onclick="showTab('calendar')">📅 캘린더</button><button class="nav-btn" id="workNav" onclick="showTab('work')">✅ 업무</button></div>
+
+<div id="calendarPage" class="tab-page active">
+  <div class="container">
+    <div class="topbar">
+      <button onclick="prevMonth()">이전</button>
+      <h2 id="monthTitle"></h2>
+      <button onclick="nextMonth()">다음</button>
+    </div>
+    <div id="calendar" class="calendar"></div>
+    <div class="team-select">
+      <strong>근무조 선택</strong>
+      <div class="team-options">
+        <label><input type="radio" name="team" value="A" checked> A조</label>
+        <label><input type="radio" name="team" value="B"> B조</label>
+        <label><input type="radio" name="team" value="C"> C조</label>
+        <label><input type="radio" name="team" value="D"> D조</label>
+      </div>
+      <div class="hint">날짜를 누르면 내 근무와 추가근무를 따로 저장할 수 있습니다. 예: 첫 줄 휴무, 둘째 줄 D조 1/4.</div>
+    </div>
+  </div>
+</div>
+
+<div id="workPage" class="tab-page"><div class="container"><div id="workCard" class="card"></div></div></div>
+
+<div id="shiftModal" class="modal-bg" onclick="closeShiftModal(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <h3 id="modalTitle">근무 변경</h3>
+    <p id="modalDesc"></p>
+    <label class="modal-label">내 근무</label>
+    <select id="baseShiftSelect" class="shift-select">
+      <option value="주간">주간</option>
+      <option value="야간">야간</option>
+      <option value="비번">비번</option>
+      <option value="휴무">휴무</option>
+    </select>
+    <label class="modal-label">추가근무</label>
+    <select id="extraTypeSelect" class="shift-select" onchange="toggleExtraBox()">
+      <option value="">없음</option>
+      <option value="1/4">1/4 근무</option>
+      <option value="1/2">1/2 근무</option>
+    </select>
+    <div id="extraTeamBox">
+      <label class="modal-label">들어가는 조</label>
+      <select id="extraTeamSelect" class="shift-select">
+        <option value="A">A조</option>
+        <option value="B">B조</option>
+        <option value="C">C조</option>
+        <option value="D">D조</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button onclick="saveShiftEdit()">저장</button>
+      <button class="gray" onclick="hideShiftModal()">취소</button>
+      <button class="red" onclick="clearShiftEdit()">기본값</button>
+      <button class="gray" onclick="hideShiftModal()">닫기</button>
+    </div>
+  </div>
+</div>
+
+<div class="bottom-nav">
+  <button id="calendarNav" class="nav-btn active" onclick="showTab('calendar')">📅 캘린더</button>
+  <button id="workNav" class="nav-btn" onclick="showTab('work')">✅ 업무</button>
+</div>
+
 <script>
-const calendar=document.getElementById('calendar'),monthTitle=document.getElementById('monthTitle'),workCard=document.getElementById('workCard'),shiftModal=document.getElementById('shiftModal'),baseShiftSelect=document.getElementById('baseShiftSelect'),extraShiftSelect=document.getElementById('extraShiftSelect'),assistTeamSelect=document.getElementById('assistTeamSelect'),assistTeamBox=document.getElementById('assistTeamBox'),modalTitle=document.getElementById('modalTitle'),modalDesc=document.getElementById('modalDesc');let currentDate=new Date(),selectedTeam=localStorage.getItem('selectedTeam')||'A',workState={type:null,time:null,direction:null},editingDateKey=null;const shiftPattern={A:['휴무','주간','야간','비번'],B:['주간','야간','비번','휴무'],C:['야간','비번','휴무','주간'],D:['비번','휴무','주간','야간']},teams=['A','B','C','D'],baseDate=new Date(2026,6,2);
-document.querySelectorAll("input[name='team']").forEach(r=>{r.checked=r.value===selectedTeam;r.addEventListener('change',e=>{selectedTeam=e.target.value;localStorage.setItem('selectedTeam',selectedTeam);renderCalendar()})});
-function pad(n){return String(n).padStart(2,'0')}function dateKey(date){return `${date.getFullYear()}-${pad(date.getMonth()+1)}-${pad(date.getDate())}`}function storeKey(team,key){return `shiftEdit:${team}:${key}`}function getDefaultShift(team,date){const diff=Math.floor((date-baseDate)/86400000),idx=((diff%4)+4)%4;return shiftPattern[team][idx]}function parseStored(v,def){if(!v)return null;if(v[0]==='{'){try{const o=JSON.parse(v);if(o.baseShift)return o;if(o.shift==='1/4'||o.shift==='1/2')return{baseShift:def,extraShift:o.shift,assistTeam:o.assistTeam};return{baseShift:o.shift||def,extraShift:'',assistTeam:null}}catch(e){return{baseShift:v,extraShift:'',assistTeam:null}}}return{baseShift:v,extraShift:'',assistTeam:null}}function formatShift(o){let text=o.baseShift; if(o.extraShift&&o.assistTeam)text+=` + ${o.assistTeam} ${o.extraShift}`; return text}function getShiftObj(team,date){const key=dateKey(date),def=getDefaultShift(team,date),saved=parseStored(localStorage.getItem(storeKey(team,key)),def);return saved||{baseShift:def,extraShift:'',assistTeam:null}}function getShift(team,date){return formatShift(getShiftObj(team,date))}function isEdited(team,date){return localStorage.getItem(storeKey(team,dateKey(date)))!==null}function isWorkingObj(o){return o.baseShift==='주간'||o.baseShift==='야간'||!!o.extraShift}
-function renderCalendar(){calendar.innerHTML='';const y=currentDate.getFullYear(),m=currentDate.getMonth();monthTitle.textContent=`${y}년 ${m+1}월`;['일','월','화','수','목','금','토'].forEach((w,i)=>{const div=document.createElement('div');div.className='weekday'+(i===0?' sun':'')+(i===6?' sat':'');div.textContent=w;calendar.appendChild(div)});const first=new Date(y,m,1),lastDate=new Date(y,m+1,0).getDate();for(let i=0;i<first.getDay();i++){const empty=document.createElement('div');empty.className='day empty';calendar.appendChild(empty)}for(let d=1;d<=lastDate;d++){const date=new Date(y,m,d),cell=document.createElement('div');cell.className='day';cell.onclick=()=>openShiftModal(date);const today=new Date();if(date.getFullYear()===today.getFullYear()&&date.getMonth()===today.getMonth()&&date.getDate()===today.getDate())cell.classList.add('today');const mine=getShiftObj(selectedTeam,date),myShift=formatShift(mine),edited=isEdited(selectedTeam,date),others=teams.filter(t=>t!==selectedTeam).map(t=>({team:t,obj:getShiftObj(t,date)})).filter(x=>isWorkingObj(x.obj));cell.innerHTML=`<div class="date-number">${d}</div><div class="my-shift ${edited?'edited':''}">${myShift}</div><div class="others-row">${others.map(o=>`<span class="other-shift">${o.team}${formatShift(o.obj)}</span>`).join('')}</div>`;calendar.appendChild(cell)}}function prevMonth(){currentDate.setMonth(currentDate.getMonth()-1);renderCalendar()}function nextMonth(){currentDate.setMonth(currentDate.getMonth()+1);renderCalendar()}
-function toggleAssistTeam(){assistTeamBox.style.display=extraShiftSelect.value?'block':'none'}function openShiftModal(date){editingDateKey=dateKey(date);const obj=getShiftObj(selectedTeam,date);baseShiftSelect.value=obj.baseShift;extraShiftSelect.value=obj.extraShift||'';assistTeamSelect.value=obj.assistTeam||'D';toggleAssistTeam();modalTitle.textContent=`${editingDateKey} 근무 변경`;modalDesc.textContent=`${selectedTeam}조 기본 근무는 ${getDefaultShift(selectedTeam,date)}입니다.`;shiftModal.classList.add('active')}function hideShiftModal(){shiftModal.classList.remove('active');editingDateKey=null}function closeShiftModal(e){if(e.target===shiftModal)hideShiftModal()}function saveManualShift(){if(!editingDateKey)return;const baseShift=baseShiftSelect.value,extraShift=extraShiftSelect.value,assistTeam=extraShift?assistTeamSelect.value:null;localStorage.setItem(storeKey(selectedTeam,editingDateKey),JSON.stringify({baseShift,extraShift,assistTeam}));hideShiftModal();renderCalendar()}function clearManualShift(){if(!editingDateKey)return;localStorage.removeItem(storeKey(selectedTeam,editingDateKey));hideShiftModal();renderCalendar()}
-function showTab(tab){document.getElementById('calendarPage').classList.toggle('active',tab==='calendar');document.getElementById('workPage').classList.toggle('active',tab==='work');document.getElementById('calendarNav').classList.toggle('active',tab==='calendar');document.getElementById('workNav').classList.toggle('active',tab==='work');if(tab==='work')renderWorkStep()}
-function renderWorkStep(){if(!workState.type){workCard.innerHTML=`<p class="step-title">업무 종류 선택</p><p class="step-sub">먼저 어떤 업무인지 골라주세요.</p><div class="choice-grid"><button class="choice" onclick="setWork('type','안내')">안내 <span>승강장·고객 안내</span></button><button class="choice" onclick="setWork('type','매표')">매표 <span>승차권·창구 업무</span></button><button class="choice" onclick="setWork('type','상황근무')">상황근무 <span>상황 대응·기록</span></button></div>`;return}if(!workState.time){workCard.innerHTML=`<button class="back" onclick="backWork('type')">← 이전</button><p class="step-title">근무시간 선택</p><p class="step-sub">${workState.type} 업무의 근무시간을 골라주세요.</p><div class="choice-grid"><button class="choice" onclick="setWork('time','주간')">주간 <span>낮 근무</span></button><button class="choice" onclick="setWork('time','야간')">야간 <span>밤 근무</span></button></div>`;return}if(workState.type==='안내'&&!workState.direction){workCard.innerHTML=`<button class="back" onclick="backWork('time')">← 이전</button><p class="step-title">방향 선택</p><p class="step-sub">안내할 방향을 골라주세요.</p><div class="choice-grid"><button class="choice" onclick="setWork('direction','상행')">상행 <span>익산·서울 방면</span></button><button class="choice" onclick="setWork('direction','하행')">하행 <span>순천·여수 방면</span></button></div>`;return}renderChecklist()}function setWork(key,val){workState[key]=val;renderWorkStep()}function backWork(key){if(key==='type')workState={type:null,time:null,direction:null};if(key==='time'){workState.time=null;workState.direction=null}if(key==='direction')workState.direction=null;renderWorkStep()}function resetWork(){workState={type:null,time:null,direction:null};renderWorkStep()}
-function renderChecklist(){const title=[workState.type,workState.time,workState.direction].filter(Boolean).join(' · ');let items=[];if(workState.type==='안내'){items=workState.time==='주간'?['09:10 화장실 점검','09:10 리프트 점검','09:10 유실물 갯수 확인','10:00 수유방 점검','11:00 화장실 점검','13:00 화장실 점검','14:00 수유방 점검','15:00 화장실 점검','17:00 화장실 점검','17:00 유실물 갯수 확인']:['야간 인수인계 확인','승강장 점검','심야 순회','화장실 상태 확인','특이사항 기록']}else if(workState.type==='매표'){items=['창구 주변 정리','승차권 발권 상태 확인','환불·변경 민원 확인','마감 전 현금·영수증 확인','특이사항 기록']}else{items=['상황 접수 내용 확인','관련 부서 연락','현장 확인','조치 내용 기록','인수인계 작성']}workCard.innerHTML=`<button class="back" onclick="${workState.type==='안내'?"backWork('direction')":"backWork('time')"}">← 이전</button><p class="step-title">체크리스트</p><div class="summary">${title}</div>${items.map((it,i)=>`<label class="check-item"><input type="checkbox" id="ck${i}"><span>${it}</span></label>`).join('')}<p class="step-sub" style="margin-top:16px;">메모</p><textarea placeholder="특이사항을 적어주세요"></textarea><button style="width:100%;margin-top:12px;" onclick="resetWork()">처음부터 다시 선택</button>`}
+const calendar=document.getElementById('calendar');
+const monthTitle=document.getElementById('monthTitle');
+const workCard=document.getElementById('workCard');
+const shiftModal=document.getElementById('shiftModal');
+const baseShiftSelect=document.getElementById('baseShiftSelect');
+const extraTypeSelect=document.getElementById('extraTypeSelect');
+const extraTeamSelect=document.getElementById('extraTeamSelect');
+const extraTeamBox=document.getElementById('extraTeamBox');
+const modalTitle=document.getElementById('modalTitle');
+const modalDesc=document.getElementById('modalDesc');
+let currentDate=new Date();
+let selectedTeam=localStorage.getItem('selectedTeam')||'A';
+let editingDateKey=null;
+let workState={type:null,time:null,direction:null};
+const teams=['A','B','C','D'];
+const baseDate=new Date(2026,6,2);
+const shiftPattern={A:['휴무','주간','야간','비번'],B:['주간','야간','비번','휴무'],C:['야간','비번','휴무','주간'],D:['비번','휴무','주간','야간']};
+
+document.querySelectorAll("input[name='team']").forEach(r=>{r.checked=r.value===selectedTeam;r.addEventListener('change',e=>{selectedTeam=e.target.value;localStorage.setItem('selectedTeam',selectedTeam);renderCalendar();});});
+function pad(n){return String(n).padStart(2,'0')}
+function keyOf(date){return `${date.getFullYear()}-${pad(date.getMonth()+1)}-${pad(date.getDate())}`}
+function storeKey(team,key){return `scheduleEdit:${team}:${key}`}
+function defaultShift(team,date){const diff=Math.floor((date-baseDate)/86400000);const idx=((diff%4)+4)%4;return shiftPattern[team][idx]}
+function readEdit(team,date){const key=keyOf(date),raw=localStorage.getItem(storeKey(team,key));const def=defaultShift(team,date);if(!raw)return{base:def,extraType:'',extraTeam:''};try{const o=JSON.parse(raw);return{base:o.base||def,extraType:o.extraType||'',extraTeam:o.extraTeam||''};}catch(e){return{base:raw||def,extraType:'',extraTeam:''};}}
+function isEdited(team,date){return localStorage.getItem(storeKey(team,keyOf(date)))!==null}
+function extraText(o){return o.extraType&&o.extraTeam?`${o.extraTeam}조 ${o.extraType}`:''}
+function isWorking(o){return o.base==='주간'||o.base==='야간'||!!o.extraType}
+function renderCalendar(){
+  calendar.innerHTML='';
+  const y=currentDate.getFullYear(),m=currentDate.getMonth();
+  monthTitle.textContent=`${y}년 ${m+1}월`;
+  ['일','월','화','수','목','금','토'].forEach((w,i)=>{const div=document.createElement('div');div.className='weekday'+(i===0?' sun':'')+(i===6?' sat':'');div.textContent=w;calendar.appendChild(div);});
+  const first=new Date(y,m,1),lastDate=new Date(y,m+1,0).getDate();
+  for(let i=0;i<first.getDay();i++){const empty=document.createElement('div');empty.className='day empty';calendar.appendChild(empty);}
+  for(let d=1;d<=lastDate;d++){
+    const date=new Date(y,m,d);const cell=document.createElement('div');cell.className='day';cell.onclick=()=>openShiftModal(date);
+    const today=new Date();if(date.getFullYear()===today.getFullYear()&&date.getMonth()===today.getMonth()&&date.getDate()===today.getDate())cell.classList.add('today');
+    const mine=readEdit(selectedTeam,date);const edited=isEdited(selectedTeam,date);
+    const others=teams.filter(t=>t!==selectedTeam).map(t=>({team:t,data:readEdit(t,date)})).filter(x=>isWorking(x.data));
+    cell.innerHTML=`<div class="date-number">${d}</div><div class="base-shift ${edited?'edited':''}">${mine.base}</div>${extraText(mine)?`<div class="extra-shift">${extraText(mine)}</div>`:''}<div class="others-row">${others.map(o=>`<span class="other-shift">${o.team}${o.data.base}${extraText(o.data)?'+'+o.data.extraType:''}</span>`).join('')}</div>`;
+    calendar.appendChild(cell);
+  }
+}
+function prevMonth(){currentDate.setMonth(currentDate.getMonth()-1);renderCalendar();}
+function nextMonth(){currentDate.setMonth(currentDate.getMonth()+1);renderCalendar();}
+function toggleExtraBox(){extraTeamBox.style.display=extraTypeSelect.value?'block':'none';}
+function openShiftModal(date){editingDateKey=keyOf(date);const data=readEdit(selectedTeam,date);baseShiftSelect.value=data.base;extraTypeSelect.value=data.extraType;extraTeamSelect.value=data.extraTeam||'D';toggleExtraBox();modalTitle.textContent=`${editingDateKey} 근무 변경`;modalDesc.textContent=`${selectedTeam}조 기본 근무는 ${defaultShift(selectedTeam,date)}입니다.`;shiftModal.classList.add('active');}
+function hideShiftModal(){shiftModal.classList.remove('active');editingDateKey=null;}
+function closeShiftModal(e){if(e.target===shiftModal)hideShiftModal();}
+function saveShiftEdit(){if(!editingDateKey)return;const data={base:baseShiftSelect.value,extraType:extraTypeSelect.value,extraTeam:extraTypeSelect.value?extraTeamSelect.value:''};localStorage.setItem(storeKey(selectedTeam,editingDateKey),JSON.stringify(data));hideShiftModal();renderCalendar();}
+function clearShiftEdit(){if(!editingDateKey)return;localStorage.removeItem(storeKey(selectedTeam,editingDateKey));hideShiftModal();renderCalendar();}
+function showTab(tab){document.getElementById('calendarPage').classList.toggle('active',tab==='calendar');document.getElementById('workPage').classList.toggle('active',tab==='work');document.getElementById('calendarNav').classList.toggle('active',tab==='calendar');document.getElementById('workNav').classList.toggle('active',tab==='work');if(tab==='work')renderWorkStep();}
+function renderWorkStep(){
+  if(!workState.type){workCard.innerHTML=`<p class="step-title">업무 종류 선택</p><p class="step-sub">먼저 어떤 업무인지 골라주세요.</p><div class="choice-grid"><button class="choice" onclick="setWork('type','안내')">안내 <span>승강장·고객 안내</span></button><button class="choice" onclick="setWork('type','매표')">매표 <span>승차권·창구 업무</span></button><button class="choice" onclick="setWork('type','상황근무')">상황근무 <span>상황 대응·기록</span></button></div>`;return;}
+  if(!workState.time){workCard.innerHTML=`<button class="back" onclick="backWork('type')">← 이전</button><p class="step-title">근무시간 선택</p><p class="step-sub">${workState.type} 업무의 근무시간을 골라주세요.</p><div class="choice-grid"><button class="choice" onclick="setWork('time','주간')">주간 <span>낮 근무</span></button><button class="choice" onclick="setWork('time','야간')">야간 <span>밤 근무</span></button></div>`;return;}
+  if(workState.type==='안내'&&!workState.direction){workCard.innerHTML=`<button class="back" onclick="backWork('time')">← 이전</button><p class="step-title">방향 선택</p><p class="step-sub">안내할 방향을 골라주세요.</p><div class="choice-grid"><button class="choice" onclick="setWork('direction','상행')">상행 <span>익산·서울 방면</span></button><button class="choice" onclick="setWork('direction','하행')">하행 <span>순천·여수 방면</span></button></div>`;return;}
+  renderChecklist();
+}
+function setWork(k,v){workState[k]=v;renderWorkStep();}
+function backWork(k){if(k==='type')workState={type:null,time:null,direction:null};if(k==='time'){workState.time=null;workState.direction=null;}if(k==='direction')workState.direction=null;renderWorkStep();}
+function resetWork(){workState={type:null,time:null,direction:null};renderWorkStep();}
+function renderChecklist(){const title=[workState.type,workState.time,workState.direction].filter(Boolean).join(' · ');let items=[];if(workState.type==='안내'){items=workState.time==='주간'?['09:10 화장실 점검','09:10 리프트 점검','09:10 유실물 갯수 확인','10:00 수유방 점검','11:00 화장실 점검','13:00 화장실 점검','14:00 수유방 점검','15:00 화장실 점검','17:00 화장실 점검','17:00 유실물 갯수 확인']:['야간 인수인계 확인','승강장 점검','심야 순회','화장실 상태 확인','특이사항 기록'];}else if(workState.type==='매표'){items=['창구 주변 정리','승차권 발권 상태 확인','환불·변경 민원 확인','마감 전 현금·영수증 확인','특이사항 기록'];}else{items=['상황 접수 내용 확인','관련 부서 연락','현장 확인','조치 내용 기록','인수인계 작성'];}workCard.innerHTML=`<button class="back" onclick="${workState.type==='안내'?"backWork('direction')":"backWork('time')"}">← 이전</button><p class="step-title">체크리스트</p><div class="summary">${title}</div>${items.map((it,i)=>`<label class="check-item"><input type="checkbox" id="ck${i}"><span>${it}</span></label>`).join('')}<p class="step-sub" style="margin-top:16px;">메모</p><textarea placeholder="특이사항을 적어주세요"></textarea><button style="width:100%;margin-top:12px;" onclick="resetWork()">처음부터 다시 선택</button>`;}
 renderCalendar();
 </script>
 </body>
